@@ -1,0 +1,13 @@
+.build/
+dist/
+.DS_Store
+*.dSYM/
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.key
+vendor/voice/lib/
+vendor/voice/model/
+vendor/voice/sources/

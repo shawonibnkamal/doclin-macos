@@ -1,0 +1,9 @@
+# Dictation indicator — 0.4.0
+
+Implemented a persistent dark floating pill with setup-needed, ready, listening, processing, insertion, retained transcript, cancellation, and error states. It shows a microphone level waveform, elapsed duration, local live transcript, finish/cancel controls, and a copy action for retained text. Cloud mode explicitly says words appear after finishing. The panel cannot become key/main, preserving the original app's focus. The main Dictation screen shows readiness before advanced settings.
+
+Permission status refreshes automatically while idle. Missing Accessibility is visible before pressing Right Command, since the global shortcut cannot register without that grant. The indicator can be hidden and re-enabled. Starting dictation cancels a UI-only preview. Preview is explicitly labeled microphone off and does not record, transcribe, or insert text.
+
+Universal build and 27 core checks plus mocked cloud checks passed. Independent review found a misleading cloud-mode no-words warning; fixed it to distinguish live local recognition from cloud recording.
+
+Updated September 8: installed and opened v0.4.0. Inspected setup and listening-preview pill screenshots, confirmed Set up opens Dictation, and preview returns to setup without recording. System Settings showed an enabled but ineffective Accessibility entry; toggling/restarting did not fix it. Removed only the selected Doclin entry and re-added the exact current app bundle through System Settings. Doclin then reported Accessibility allowed and Shortcut ready. Renewed Speech Recognition request; all three permissions now read Allowed. Started real on-device microphone capture through Start dictation here, verified Listening, and canceled with no insertion. Physical Right Command hold and full cross-app transcription/insertion remain user-side verification; automation offers only discrete key presses, not a held key.
