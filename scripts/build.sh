@@ -1,9 +1,36 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-ROOT="$PWD"
+ROOT="$(pwd -P)"
 BUILD_DIR="${DOCLIN_BUILD_DIR:-$ROOT/.build}"
-DIST="${DOCLIN_DIST_DIR:-$ROOT/dist}"
+LOCAL_SIGNING=0
+LOCAL_CONFIG="$HOME/Library/Application Support/Doclin/Signing/identity.json"
+if [[ -z "${SIGN_IDENTITY:-}" && -f "$LOCAL_CONFIG" ]]; then
+    SIGNING_IDENTITY="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["identity"])' "$LOCAL_CONFIG")"
+    LOCAL_SIGNING=1
+else
+    SIGNING_IDENTITY="${SIGN_IDENTITY:--}"
+fi
+sign_code() {
+    if [[ "$LOCAL_SIGNING" == "1" ]]; then "$ROOT/scripts/signing/sign.py" "$@"
+    else codesign --sign "$SIGNING_IDENTITY" "$@"
+    fi
+}
+# An ad-hoc rebuild changes the identity used by macOS privacy grants.
+# Keep the daily-use bundle untouched until a stable certificate is configured.
+if [[ "$SIGNING_IDENTITY" == "-" ]]; then
+    DIST="${DOCLIN_DIST_DIR:-$BUILD_DIR/preview-dist}"
+    mkdir -p "$DIST"
+    DIST="$(cd "$DIST" && pwd -P)"
+    if [[ "$DIST" == "$ROOT/dist" ]]; then
+        echo "Refusing to replace the installed Doclin with an ad-hoc build." >&2
+        echo "Set SIGN_IDENTITY to a stable signing certificate, or build to a separate preview directory." >&2
+        exit 1
+    fi
+    echo "Ad-hoc preview only: $DIST (installed app and its permissions are preserved)."
+else
+    DIST="${DOCLIN_DIST_DIR:-$BUILD_DIR/signed-dist}"
+fi
 APP="$DIST/Doclin.app"
 mkdir -p "$DIST"
 swift build --scratch-path "$BUILD_DIR" -c release --product Doclin
@@ -24,8 +51,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Doclin</string>
 <key>CFBundleDisplayName</key><string>Doclin</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.4.5</string>
-<key>CFBundleVersion</key><string>13</string>
+<key>CFBundleShortVersionString</key><string>0.4.7</string>
+<key>CFBundleVersion</key><string>15</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><false/>
 <key>NSMicrophoneUsageDescription</key><string>Doclin records your voice only when you start dictation.</string>
@@ -53,16 +80,16 @@ cp "$ROOT"/vendor/voice/lib/*.dylib "$APP/Contents/Frameworks/"
 ditto "$ROOT/vendor/voice/model" "$APP/Contents/Resources/VoiceModel"
 clang -arch arm64 -arch x86_64 -mmacosx-version-min=13.0 -Wno-deprecated-declarations -I "$ROOT/vendor/voice/include" "$ROOT/scripts/voice/main.c" -L "$ROOT/vendor/voice/lib" -lsherpa-onnx-c-api -Wl,-rpath,@executable_path/../Frameworks -o "$APP/Contents/MacOS/doclin-voice"
 for library in "$APP"/Contents/Frameworks/*.dylib; do
-    codesign --force --options runtime --sign "${SIGN_IDENTITY:--}" "$library"
+    sign_code --force --options runtime "$library"
 done
-if [[ "${SIGN_IDENTITY:--}" == "-" ]]; then
-    # Ad-hoc identities have no Team ID for hardened library validation.
-    codesign --force --sign - "$APP/Contents/MacOS/doclin-voice"
+if [[ "$SIGNING_IDENTITY" == "-" || "$LOCAL_SIGNING" == "1" ]]; then
+    # Ad-hoc/local certificates have no Apple Team ID; preserve the helper runtime policy.
+    sign_code --force "$APP/Contents/MacOS/doclin-voice"
 else
-    codesign --force --options runtime --sign "$SIGN_IDENTITY" "$APP/Contents/MacOS/doclin-voice"
+    sign_code --force --options runtime "$APP/Contents/MacOS/doclin-voice"
 fi
 # Ad-hoc signing runs locally; set SIGN_IDENTITY for a Developer ID distribution build.
-codesign --force --options runtime --entitlements "$ROOT/scripts/entitlements.plist" --sign "${SIGN_IDENTITY:--}" "$APP"
+sign_code --force --options runtime --entitlements "$ROOT/scripts/entitlements.plist" "$APP"
 codesign --verify --deep --strict "$APP"
-ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Doclin-0.4.5-mac.zip"
+ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Doclin-0.4.7-mac.zip"
 echo "Built: $APP"

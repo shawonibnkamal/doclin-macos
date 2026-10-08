@@ -3,7 +3,13 @@ import Speech
 
 /// Seal the audio stream at release without waiting for hardware teardown.
 /// Closing and appending share a lock, so every accepted buffer precedes endAudio.
-final class DictationAudioStream: @unchecked Sendable {
+protocol DictationAudioSink: Sendable {
+    var isClosed: Bool { get }
+    func append(_ buffer: AVAudioPCMBuffer) -> Bool
+    func endAudio()
+}
+
+final class DictationAudioStream: DictationAudioSink, @unchecked Sendable {
     private let lock = NSLock()
     private var closed = false
     private let request: SFSpeechAudioBufferRecognitionRequest
@@ -28,7 +34,7 @@ final class DictationCapture: @unchecked Sendable {
     private var engine: AVAudioEngine?
     private var tapped = false
 
-    func start(stream: DictationAudioStream, level: @escaping @Sendable (Float) -> Void,
+    func start(stream: any DictationAudioSink, level: @escaping @Sendable (Float) -> Void,
                completion: @escaping @Sendable (String?) -> Void) {
         queue.async { [self] in
             do {

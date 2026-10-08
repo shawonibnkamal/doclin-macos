@@ -43,7 +43,7 @@ struct DoclinView: View {
                 HStack {
                     Text(model.status).lineLimit(1)
                     Spacer()
-                    Text("DOCLIN / 0.4.5").font(.system(size: 10, design: .monospaced)).tracking(1)
+                    Text("DOCLIN / 0.4.7").font(.system(size: 10, design: .monospaced)).tracking(1)
                 }.font(.system(size: 11)).foregroundColor(mutedInk).padding(.horizontal, 32).padding(.vertical, 14).background(Color.white.opacity(0.6))
             }.frame(maxWidth: .infinity, maxHeight: .infinity).background(canvas)
         }.frame(minWidth: 890, minHeight: 650).foregroundColor(ink).preferredColorScheme(.light)
@@ -89,7 +89,7 @@ struct DoclinView: View {
             HStack(spacing: 12) {
                 stat("CODEX", "\(model.watchedCount)", "recent sessions observed")
                 stat("UP NEXT", "\(model.pendingCount)", "fresh announcements")
-                stat("VOICE", model.preferences.aiVoice && model.hasKey ? "AI" : (model.hasLocalVoice && model.preferences.systemVoice.isEmpty ? "Kokoro" : "Mac"), model.preferences.useAI && model.hasKey ? "AI summaries enabled" : "local excerpts · no API cost")
+                stat("VOICE", model.preferences.aiVoice && model.hasKey ? "AI" : (LocalVoiceChoice.speaker(for: model.preferences.systemVoice) != nil ? (model.hasLocalVoice ? "Kokoro" : "Unavailable") : "Mac"), model.preferences.useAI && model.hasKey ? "AI summaries enabled" : "local excerpts · no API cost")
             }
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
@@ -172,10 +172,10 @@ struct DoclinView: View {
                 Text("Your everyday voice").font(.system(size: 15, weight: .semibold))
                 Text("Output: \(model.outputName)").font(.system(size: 12)).foregroundColor(mutedInk)
                 Picker("Voice", selection: binding(\.systemVoice)) {
-                    Text(model.hasLocalVoice ? "Doclin · natural voice (recommended)" : "Automatic · Mac fallback").tag("")
+                    ForEach(LocalVoiceChoice.choices, id: \.key) { Text($0.name).tag($0.key) }
                     ForEach(model.voices, id: \.identifier) { Text("\($0.name) · \($0.language)").tag($0.identifier) }
                 }
-                Text("Kokoro speech runs entirely on your Mac. If it is unavailable, Doclin uses the Mac voice automatically.").font(.system(size: 11)).foregroundColor(mutedInk)
+                Text("These voices run on your Mac. Preview each one to choose your preference. If the chosen voice fails, the update stays in Activity instead of switching to a Mac voice.").font(.system(size: 11)).foregroundColor(mutedInk)
                 HStack { Text("Volume").frame(width: 65, alignment: .leading); Slider(value: binding(\.volume), in: 0...1); Text("\(Int(model.preferences.volume * 100))%").frame(width: 35) }.font(.system(size: 12))
                 HStack { Text("Speed").frame(width: 65, alignment: .leading); Slider(value: binding(\.rate), in: 0.8...1.5); Text(String(format: "%.1f×", model.preferences.rate)).frame(width: 35) }.font(.system(size: 12))
                 Button("Preview voice") { model.preview() }.buttonStyle(DoclinButton())
@@ -214,7 +214,7 @@ struct DoclinView: View {
                 Text("AI summaries request store: false. OpenAI’s own API data policies still apply.").font(.system(size: 11)).foregroundColor(mutedInk)
                 Button("Clear recent announcements") { model.clearHistory() }
             }
-            Text("Doclin 0.4.5 · macOS 13 or later\nPersonal preview build. Public distribution requires Developer ID signing and notarization.").font(.system(size: 11)).foregroundColor(mutedInk).lineSpacing(4)
+            Text("Doclin 0.4.7 · macOS 13 or later\nPersonal preview build. Public distribution requires Developer ID signing and notarization.").font(.system(size: 11)).foregroundColor(mutedInk).lineSpacing(4)
         }
     }
     private func binding<T>(_ path: WritableKeyPath<Preferences, T>) -> Binding<T> {
