@@ -23,7 +23,7 @@ struct Announcement: Identifiable {
     @Published var hasKey = false
     @Published var claudeInstalled = false
     @Published var loginEnabled = false
-    @Published var tab = "Activity"
+    @Published var tab = "Dictation"
     let dictation = DictationController()
     private var dictationBusy = false
     private var policy = QueuePolicy()
@@ -162,7 +162,7 @@ struct Announcement: Identifiable {
             guard valid(ticket) else { return }
             if let speaker = LocalVoiceChoice.speaker(for: preferences.systemVoice) {
                 guard LocalVoice.available else {
-                    notice = "The local voice is unavailable. Update kept in Activity."
+                    notice = "The local voice is unavailable. Update kept in Agent updates."
                     stopCurrent(reason: "Voice unavailable"); startNext(); return
                 }
                 do {
@@ -172,7 +172,7 @@ struct Announcement: Identifiable {
                     return
                 } catch {
                     if valid(ticket) {
-                        notice = "The local voice could not play. Update kept in Activity."
+                        notice = "The local voice could not play. Update kept in Agent updates."
                         stopCurrent(reason: "Voice unavailable"); startNext()
                     }
                     return
@@ -218,7 +218,7 @@ struct Announcement: Identifiable {
                     }
                 } catch {
                     self.cleanSpeechFile()
-                    self.notice = "Could not play through the selected audio output. Update kept in Activity."
+                    self.notice = "Could not play through the selected audio output. Update kept in Agent updates."
                     self.stopCurrent(reason: "Audio unavailable"); self.startNext()
                 }
             }

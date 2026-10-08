@@ -1,19 +1,21 @@
-# Open-source preview release
+# Doclin 0.4.8 — Minimal Mac preview
 
-Doclin provides local dictation and spoken agent updates on macOS. Local-mode
-recordings stay on the user's Mac. Optional OpenAI transcription, cleanup,
-summary and speech explicitly send selected content to OpenAI.
+A compact window opens directly to Dictation. Three tabs provide Dictation,
+Agent updates and Settings; Voice, Agents and General expand one at a time.
+Advanced options remain available without filling the main screen. The original Doclin logo and blue/mint colors are used throughout.
+The landing page focuses on a real app screenshot and a download action.
 
-The main app is MIT licensed; bundled components retain their own licenses.
-The separate voice helper is GPL-3.0-or-later. This is a source preview, not a
-notarized binary release. Build/setup instructions are in README.md.
+The downloadable universal app is signed with a persistent local development
+certificate, not Apple Developer ID, and is not notarized. macOS may block a
+quarantined download. Clean-Mac installation and actual Intel playback remain
+unverified. No Wispr Flow accuracy-superiority claim is made.
 
-Release preparation verified a dependency-restored source checkout, SHA-256
-checks for downloaded archives and model/source/header files, 33 core checks
-plus mocked cloud checks, and universal packaging. Actual Intel hardware,
-clean-Mac installation, broad editor insertion, and accuracy parity with other
-dictation products remain unverified. No claim of Wispr Flow superiority is made.
+Verification: 33 core checks plus mocked cloud transport checks; universal
+build and strict code-signature validation; packaged voice synthesis; native
+first-use, recording/transcript and settings navigation. Different binaries
+verify against the same certificate-backed designated requirement. Local
+permission persistence across future live updates still needs observation.
 
-Public binary downloads require Developer ID signing, notarization and a clean
-Mac download test. Private signing credentials and runtime user data are excluded
-from the source release.
+Local transcription and voices stay on-device. Optional OpenAI features are
+off by default and send selected audio/text only when enabled. Main app MIT;
+third-party licenses, including the separate GPL voice helper, are preserved.
