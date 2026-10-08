@@ -50,7 +50,7 @@ public struct Preferences: Codable {
     public var useAI = false
     public var aiVoice = false
     public var voice = "coral"
-    public var systemVoice = ""
+    public var systemVoice = "kokoro:2"
     public var volume: Double = 0.55
     public var rate: Double = 1.0
     public var wordLimit = 15
@@ -61,6 +61,8 @@ public struct Preferences: Codable {
     public static func load() -> Preferences {
         guard let d = try? Data(contentsOf: DoclinPaths.support.appendingPathComponent("preferences.json")), let p = try? JSONDecoder().decode(Preferences.self, from: d) else { return Preferences() }
         var safe = p
+        // The old automatic selection used Heart. This release defaults to Bella.
+        if safe.systemVoice.isEmpty { safe.systemVoice = "kokoro:2" }
         safe.wordLimit = min(25, max(15, p.wordLimit))
         safe.volume = min(1, max(0, p.volume))
         safe.rate = min(1.5, max(0.8, p.rate))

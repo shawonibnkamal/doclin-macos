@@ -27,7 +27,7 @@ struct DictationView: View {
                     Button(controller.recording ? "Finish dictation" : "Start dictation here") { if controller.recording { controller.finish() } else { controller.begin(inApp: true) } }.buttonStyle(DoclinButton()).disabled(controller.busy && !controller.recording)
                     Button("Preview indicator") { controller.previewIndicator() }.disabled(controller.busy)
                 }
-                Text("The floating pill appears when you press Right Command and hides when you release or cancel. Audio bars move with your microphone. On-device mode shows live words; cloud mode transcribes after you finish. Preview shows the UI without recording.").font(.system(size: 11)).foregroundColor(.secondary)
+                Text("A small pill shows microphone activity and elapsed time. Release to finish; click × to cancel. Preview does not record audio.").font(.system(size: 11)).foregroundColor(.secondary)
             }
             card {
                 HStack { Label("Voice to text", systemImage: "mic").font(.system(size: 16, weight: .semibold)); Spacer(); Toggle("Enable dictation", isOn: setting(\.enabled)).toggleStyle(.switch).controlSize(.small) }
@@ -44,7 +44,7 @@ struct DictationView: View {
             card {
                 HStack { Text("One-time setup").font(.system(size: 15, weight: .semibold)); Spacer(); Button("Refresh") { controller.refreshPermissions() }.font(.system(size: 11)) }
                 permission("Microphone", detail: "Records only while you dictate.", granted: controller.microphoneGranted, action: { controller.requestMicrophone() })
-                if controller.settings.provider == "local" {
+                if controller.settings.provider == "local" && !controller.modernReady {
                     permission("Speech Recognition", detail: "Required for Apple’s on-device transcription.", granted: controller.speechGranted, action: { controller.requestSpeech() })
                 }
                 permission("Accessibility", detail: "Enables Right Command and inserts text into other apps.", granted: controller.accessibilityGranted, action: { controller.openAccessibility() })
@@ -59,6 +59,8 @@ struct DictationView: View {
                     ForEach([("en-US", "English (US)"), ("en-CA", "English (Canada)"), ("en-GB", "English (UK)"), ("fr-FR", "French"), ("es-ES", "Spanish"), ("de-DE", "German"), ("pt-BR", "Portuguese"), ("bn-BD", "Bengali")], id: \.0) { Text($0.1).tag($0.0) }
                 }
                 if controller.settings.provider == "local" {
+                    Text(controller.recognitionEngine).font(.system(size: 12, weight: .medium))
+                    if !controller.engineMessage.isEmpty { Text(controller.engineMessage).font(.system(size: 11)).foregroundColor(.secondary) }
                     Text(controller.onDeviceSupported ? "On-device recognition is available. Audio stays on your Mac." : "On-device recognition is not available for this language on this Mac. Choose another language or OpenAI.").font(.system(size: 11)).foregroundColor(.secondary)
                 } else {
                     Text("Your recording and vocabulary go directly to OpenAI for transcription with GPT-4o mini transcribe. API usage is billed to your account. Audio files are deleted after reading or cancellation; crash leftovers are removed on launch.").font(.system(size: 11)).foregroundColor(.secondary)

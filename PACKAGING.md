@@ -1,29 +1,63 @@
 # Packaging Doclin
 
-The build script creates a self-contained `Doclin.app` and ZIP. It uses macOS 13 as the deployment floor. The default build targets the build Mac's architecture; `UNIVERSAL=1` combines Apple silicon and Intel binaries.
+## Local preview
 
-## Public release
+From a fresh clone, run `python3 scripts/voice/fetch.py` first. Then:
 
-Developer ID signing requires an Apple Developer Program account and an installed signing identity. These are not included in the source or preview.
+```sh
+swift run DoclinChecks
+SIGN_IDENTITY=- ./scripts/build.sh
+open .build/preview-dist/Doclin.app
+```
+
+`UNIVERSAL=1` combines Apple silicon and Intel main app slices. The speech
+helper/runtime is universal. Cross-compilation does not prove Intel playback.
+The app targets macOS 13; enhanced speech needs supported macOS 26 devices and
+languages, and the bundled Intel voice runtime requires macOS 15.5+.
+
+An ad-hoc rebuild changes macOS's designated code requirement and can invalidate
+Microphone/Accessibility grants. The script refuses ad-hoc output into the
+installed `dist` directory. Default candidate output never replaces daily use.
+
+## Stable local identity
+
+`scripts/signing/setup-local.py` creates a dedicated encrypted Keychain outside
+the repo. `scripts/signing/trust-local.sh` requests user-scoped code-signing
+trust and may require macOS authentication. This setup is optional and for the
+builder's Mac only; it is not Developer ID signing or notarization.
+
+When no explicit `SIGN_IDENTITY` is supplied, builds reuse that local config if
+present. Signing failures abort. Signed output defaults to `.build/signed-dist`.
+Verify designated requirements match across changed builds before claiming
+permission persistence. Switching away from an old ad-hoc identity may require
+one permission renewal. Never publish private certificates, keys or passwords.
+
+## Public downloads
+
+Source publication and trusted binary distribution are separate milestones.
+A public app download needs an Apple Developer Program account, Developer ID
+Application certificate, and notarization credentials. None are in this repo.
 
 ```sh
 UNIVERSAL=1 SIGN_IDENTITY='Developer ID Application: YOUR NAME (TEAMID)' ./scripts/build.sh
-xcrun notarytool submit dist/Doclin-0.2.0-mac.zip --keychain-profile doclin-notary --wait
-xcrun stapler staple dist/Doclin.app
-codesign --verify --deep --strict dist/Doclin.app
-spctl --assess --type execute --verbose dist/Doclin.app
-# Recreate ZIP after stapling.
-ditto -c -k --sequesterRsrc --keepParent dist/Doclin.app dist/Doclin-0.2.0-mac.zip
+xcrun notarytool submit .build/signed-dist/Doclin-0.4.7-mac.zip --keychain-profile doclin-notary --wait
+xcrun stapler staple .build/signed-dist/Doclin.app
+codesign --verify --deep --strict .build/signed-dist/Doclin.app
+spctl --assess --type execute --verbose .build/signed-dist/Doclin.app
+ditto -c -k --sequesterRsrc --keepParent .build/signed-dist/Doclin.app .build/signed-dist/Doclin-0.4.7-mac.zip
 ```
 
-Create the notary profile securely using Apple's tooling. Do not put passwords, API keys, or signing certificates in this repository. Increment both bundle version fields in `scripts/build.sh` for releases. Verify both architectures on actual target hardware; a successful cross-compile does not establish Intel runtime behavior.
+Inspect the exact ZIP contents before upload. Include the third-party license
+texts and corresponding sources already bundled by the build script. Verify a
+quarantined download on a clean Mac and test target architectures. Publishing
+an unsigned ZIP is not a substitute for those checks.
 
-The app is intentionally unsandboxed because it reads user-owned agent session files and installs user-level Claude hooks. It uses hardened runtime signing, audio-input and speech-recognition entitlements for opt-in dictation. It has no general keyboard monitor and no network listener. macOS permission approval is required for recording and Accessibility insertion.
+The app is unsandboxed to read user-owned agent sessions and install user-level
+Claude hooks. It uses hardened runtime signing with audio/speech entitlements.
+The local/ad-hoc voice helper retains a separate non-hardened policy because
+those certificates lack an Apple Team ID. Public Developer ID helper builds
+use hardened runtime. No network listener is exposed. Right Command passively
+observes modifier/key-down events; it does not store typed key contents.
 
-## Installation and removal
-
-Move the app to Applications before enabling Start at login. Login registration uses `SMAppService.mainApp`.
-
-To remove Doclin: disconnect Claude in the app, disable Start at login, quit, and delete the app. Preferences and the copied helper are in `~/Library/Application Support/Doclin`. The Keychain item uses service `dev.doclin.app` and account `openai-api-key`; remove it in Voice & AI before uninstalling. Existing Claude configuration backups are named `settings.doclin-backup-<UUID>.json` next to Claude's settings.
-
-The name and domain are working branding. Domain registration, trademark clearance, public hosting, paid signing, and publishing have not been performed.
+Move a released app to Applications before enabling Start at login. See
+[Privacy](PRIVACY.md) for permissions, cloud options, retention and removal.

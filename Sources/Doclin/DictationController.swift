@@ -38,7 +38,7 @@ import DoclinCore
         if phase == "Text ready" || phase == "Paste requested" { return .retained }
         if phase == "Canceled" { return .canceled }
         if !settings.enabled { return .off }
-        if !microphoneGranted || (settings.provider == "local" && !speechGranted) || !shortcutReady { return .setup }
+        if !microphoneGranted || (settings.provider == "local" && !modernReady && !speechGranted) || !shortcutReady { return .setup }
         return .ready
     }
     var indicatorTitle: String {
@@ -60,7 +60,7 @@ import DoclinCore
         case .setup:
             if !accessibilityGranted && settings.shortcut == "right-command" { return "Right Command needs Accessibility permission" }
             if !microphoneGranted { return "Microphone permission needed" }
-            if !speechGranted && settings.provider == "local" { return "Speech Recognition permission needed" }
+            if !modernReady && !speechGranted && settings.provider == "local" { return "Speech Recognition permission needed" }
             return "Choose an available shortcut in settings"
         case .listening: return indicatorArmed || microphoneStarting ? "Starting microphone…" : "Release \(shortcutLabel) or click stop to finish"
         case .processing: return "Recording stopped"
@@ -72,9 +72,8 @@ import DoclinCore
         case .ready: return "Or click the microphone · Doclin"
         }
     }
-    var indicatorHeight: CGFloat {
-        switch indicatorState { case .listening: return 174; case .processing, .retained, .error: return 126; default: return 78 }
-    }
+    var indicatorHeight: CGFloat { 38 }
+    var indicatorWidth: CGFloat { 184 }
     var indicatorLevel: Float { indicatorPreview ? 0.6 : level }
     var onBusyChange: (Bool) -> Void = { _ in }
     private let hotkey = DictationHotkey()
@@ -82,7 +81,16 @@ import DoclinCore
     private var target: TextInsertion.Target?
     private var lifecycle = DictationLifecycle()
     private let capture = DictationCapture()
-    private var captureStream: DictationAudioStream?
+    private var captureStream: (any DictationAudioSink)?
+    private var modernSession: AnyObject?
+    private var preparedModernSession: AnyObject?
+    private var preparationTask: Task<Void, Never>?
+    private var assetTask: Task<Void, Never>?
+    private var preparedAssetLocale = ""
+    private var reservedModernLocale: Locale?
+    @Published private(set) var modernReady = false
+    @Published private(set) var recognitionEngine = "Apple speech"
+    @Published private(set) var engineMessage = ""
     private var cachedRecognizer: SFSpeechRecognizer?
     private var cachedLocale = ""
     @Published var microphoneStarting = false
@@ -115,7 +123,7 @@ import DoclinCore
     var busy: Bool { lifecycle.phase != .idle }
     var recording: Bool { lifecycle.phase == .recording }
     var shortcutLabel: String { DictationHotkey.choices.first(where: { $0.0 == settings.shortcut })?.1 ?? "Choose a shortcut" }
-    var onDeviceSupported: Bool { recognizer()?.supportsOnDeviceRecognition == true }
+    var onDeviceSupported: Bool { modernReady || recognizer()?.supportsOnDeviceRecognition == true }
     override init() {
         super.init()
         refreshPermissions()
@@ -129,7 +137,7 @@ import DoclinCore
         hotkey.onPress = { [weak self] in self?.begin() }
         hotkey.onCancel = { [weak self] in self?.cancel() }
         hotkey.onRelease = { [weak self] in self?.finish() }
-        configureHotkey()
+        configureHotkey(); prepareModernAssets()
         let permissionTimer = Timer(timeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor in guard let self, !self.busy else { return }; self.refreshPermissions() }
         }
@@ -160,7 +168,56 @@ import DoclinCore
     func saveSettings() {
         cancel(showMessage: false)
         do { try settings.save() } catch { message = "Could not save dictation settings." }
-        configureHotkey(); refreshPermissions()
+        configureHotkey(); refreshPermissions(); prepareModernAssets()
+    }
+    private func prepareModernAssets(force: Bool = false) {
+        let signature = [settings.provider, settings.locale, String(settings.enabled), settings.vocabulary].joined(separator: "|")
+        guard force || preparedAssetLocale != signature else { return }
+        preparedAssetLocale = signature
+        if #available(macOS 26.0, *), let session = preparedModernSession as? ModernDictation { session.cancel() }
+        preparedModernSession = nil
+        let previousTask = assetTask
+        previousTask?.cancel(); modernReady = false
+        recognitionEngine = "Apple speech"
+        guard #available(macOS 26.0, *) else { engineMessage = ""; return }
+        let identifier = settings.locale, enabled = settings.enabled, provider = settings.provider, terms = settings.terms
+        engineMessage = enabled && provider == "local" ? "Preparing enhanced on-device recognition…" : ""
+        assetTask = Task { [weak self] in
+            // Serialize reservations across canceled preparation tasks/language changes.
+            await previousTask?.value
+            guard !Task.isCancelled, let self else { return }
+            guard enabled, provider == "local", SpeechTranscriber.isAvailable,
+                  let locale = await SpeechTranscriber.supportedLocale(equivalentTo: Locale(identifier: identifier)) else {
+                if let previous = self.reservedModernLocale { _ = await AssetInventory.release(reservedLocale: previous); self.reservedModernLocale = nil }
+                if enabled && provider == "local" { self.engineMessage = "Enhanced recognition is unavailable for this language; using Apple speech." }
+                return
+            }
+            do {
+                try Task.checkCancellation()
+                if let previous = self.reservedModernLocale, previous.identifier != locale.identifier {
+                    _ = await AssetInventory.release(reservedLocale: previous); self.reservedModernLocale = nil
+                }
+                try Task.checkCancellation()
+                _ = try await AssetInventory.reserve(locale: locale)
+                self.reservedModernLocale = locale
+                try Task.checkCancellation()
+                let transcriber = SpeechTranscriber(locale: locale, preset: .progressiveTranscription)
+                if await AssetInventory.status(forModules: [transcriber]) != .installed {
+                    self.engineMessage = "Downloading the on-device speech model. Audio stays on your Mac."
+                    if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) { try await request.downloadAndInstall() }
+                }
+                try Task.checkCancellation()
+                let session = try await ModernDictation.prepare(locale: locale, terms: terms) { _ in }
+                guard !Task.isCancelled else { session.cancel(); return }
+                self.preparedModernSession = session; self.modernReady = true
+                self.recognitionEngine = "Enhanced Apple speech"
+                self.engineMessage = "Enhanced streaming recognition is ready. Audio stays on your Mac."
+            } catch {
+                guard !Task.isCancelled else { return }
+                self.modernReady = false; self.preparedAssetLocale = ""
+                self.engineMessage = "Enhanced model unavailable. Using Apple speech; change language to retry."
+            }
+        }
     }
     private func configureHotkey() {
         hotkey.unregister(); shortcutReady = false
@@ -177,7 +234,7 @@ import DoclinCore
         guard settings.enabled else { hideIndicator(); message = "Enable dictation first."; openSettings(); return }
         guard microphoneGranted else { message = "Allow Microphone in Dictation settings, then press the shortcut again."; phase = "Microphone needed"; hideIndicator(); openSettings(); return }
         if settings.provider == "local" {
-            guard speechGranted else { message = "Allow Speech Recognition in Dictation settings first."; phase = "Speech permission needed"; hideIndicator(); openSettings(); return }
+            guard modernReady || speechGranted else { message = "Allow Speech Recognition in Dictation settings first."; phase = "Speech permission needed"; hideIndicator(); openSettings(); return }
             guard onDeviceSupported else { message = "On-device recognition is unavailable for this language on this Mac. Choose another language or OpenAI transcription."; phase = "Language unavailable"; hideIndicator(); openSettings(); return }
         } else if keyProvider() == nil {
             message = "Add your OpenAI API key in Voice & AI, or choose On this Mac."; phase = "API key needed"; hideIndicator(); openSettings(); return
@@ -191,7 +248,10 @@ import DoclinCore
         phase = "Listening"; message = inApp ? "Speak, then click Finish." : "Release \(shortcutLabel) to finish."
         onBusyChange(true); showHUD()
         do {
-            if settings.provider == "local" { try startLocal(ticket) } else { try startCloudRecording() }
+            if settings.provider == "local" {
+                if #available(macOS 26.0, *), modernReady { startModern(ticket) }
+                else { try startLocal(ticket) }
+            } else { try startCloudRecording() }
             let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in Task { @MainActor in self?.tick() } }
             self.timer = timer; RunLoop.main.add(timer, forMode: .common)
         } catch { fail("Could not start the microphone: \(error.localizedDescription)", ticket: ticket) }
@@ -222,7 +282,11 @@ import DoclinCore
                 }
             }
         }
-        let stream = DictationAudioStream(request); captureStream = stream
+        let stream = DictationAudioStream(request)
+        startCapture(stream, ticket: ticket)
+    }
+    private func startCapture(_ stream: any DictationAudioSink, ticket: UUID) {
+        captureStream = stream
         capture.start(stream: stream, level: { [weak self] value in
             Task { @MainActor in
                 guard let self, self.lifecycle.accepts(ticket), self.recording else { return }
@@ -240,6 +304,41 @@ import DoclinCore
             }
         })
     }
+    @available(macOS 26.0, *)
+    private func startModern(_ ticket: UUID) {
+        if let session = preparedModernSession as? ModernDictation {
+            preparedModernSession = nil; modernSession = session
+            session.onUpdate = { [weak self] text in
+                guard let self, self.lifecycle.accepts(ticket), !self.finalizing else { return }
+                self.partial = text
+            }
+            startCapture(session.stream, ticket: ticket)
+            return
+        }
+        preparationTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let session = try await ModernDictation.prepare(locale: Locale(identifier: self.settings.locale), terms: self.settings.terms) { [weak self] text in
+                    guard let self, self.lifecycle.accepts(ticket), !self.finalizing else { return }
+                    self.partial = text
+                }
+                guard !Task.isCancelled, self.lifecycle.accepts(ticket), self.recording else { session.cancel(); return }
+                self.modernSession = session
+                self.startCapture(session.stream, ticket: ticket)
+            } catch {
+                guard !Task.isCancelled, self.lifecycle.accepts(ticket), self.recording else { return }
+                self.modernReady = false; self.preparedAssetLocale = ""
+                self.recognitionEngine = "Apple speech"
+                self.engineMessage = "Enhanced recognition could not start. Using standard Apple speech."
+                if self.speechGranted, self.recognizer()?.supportsOnDeviceRecognition == true {
+                    do { try self.startLocal(ticket) }
+                    catch { self.fail("Could not start on-device recognition. Try again.", ticket: ticket) }
+                } else {
+                    self.fail("Enhanced recognition could not start. Allow Speech Recognition to use the fallback.", ticket: ticket)
+                }
+            }
+        }
+    }
     private func startCloudRecording() throws {
         try FileManager.default.createDirectory(at: audioFolder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         let url = audioFolder.appendingPathComponent(UUID().uuidString + ".m4a"); recordingURL = url
@@ -254,14 +353,40 @@ import DoclinCore
         guard recording else { return }
         seconds = Int(Date().timeIntervalSince(startedAt))
         if let recorder { recorder.updateMeters(); level = min(1, pow(10, recorder.averagePower(forChannel: 0) / 20) * 5) }
-        if seconds >= (settings.provider == "local" ? 55 : 90) { finish() }
+        if seconds >= (modernSession != nil ? 300 : settings.provider == "local" ? 55 : 90) { finish() }
     }
     func finish() {
         hideIndicator()
         guard lifecycle.finishRecording(), let ticket = lifecycle.ticket else { return }
         releasedAt = now()
+        if microphoneStarting && captureStream == nil {
+            preparationTask?.cancel(); preparationTask = nil
+            fail("Recording stopped before the microphone was ready. Wait for the start sound before speaking.", ticket: ticket)
+            return
+        }
         stopCapture(); phase = "Transcribing"; message = "Turning your voice into text…"
-        if settings.provider == "local" {
+        if #available(macOS 26.0, *), let session = modernSession as? ModernDictation {
+            finalTimeout = Task { [weak self] in
+                do { try await Task.sleep(nanoseconds: 8_000_000_000) } catch { return }
+                guard let self, self.lifecycle.accepts(ticket), !self.finalizing else { return }
+                session.cancel(); self.modernSession = nil; self.target = nil
+                self.message = "Recognition took too long. Review the available transcript."
+                self.resolve(self.partial, ticket: ticket)
+            }
+            networkTask = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    let text = try await session.finish()
+                    guard !Task.isCancelled, self.lifecycle.accepts(ticket), !self.finalizing else { return }
+                    self.modernSession = nil; self.resolve(text, ticket: ticket)
+                } catch {
+                    guard !Task.isCancelled, self.lifecycle.accepts(ticket), !self.finalizing else { return }
+                    session.cancel(); self.modernSession = nil; self.target = nil
+                    self.message = "Recognition ended early. Review the available transcript."
+                    self.resolve(self.partial, ticket: ticket)
+                }
+            }
+        } else if settings.provider == "local" {
             // stopCapture sealed the stream before queuing device teardown.
             // Final recognition can proceed while the audio device stops.
             finalTimeout = Task { [weak self] in
@@ -316,6 +441,7 @@ import DoclinCore
                 self.timing = "Mic: \(self.startupMS) ms · Final text: \(recognitionMS) ms · Cleanup/insertion: \(insertionMS) ms"
             }
             self.target = nil; self.level = 0; self.onBusyChange(false); self.dismissHUDLater()
+            if self.preparedModernSession == nil { self.prepareModernAssets(force: true) }
         }
     }
     private func stopCapture() {
@@ -332,6 +458,10 @@ import DoclinCore
     func cancel(showMessage: Bool = true) {
         hideIndicator(); startCue.stop()
         lifecycle.cancel(); finalizing = false
+        preparationTask?.cancel(); preparationTask = nil
+        if #available(macOS 26.0, *), let session = modernSession as? ModernDictation { session.cancel() }
+        modernSession = nil
+        if preparedModernSession == nil { prepareModernAssets(force: true) }
         stopCapture(); recognitionTask?.cancel(); recognitionTask = nil; recognitionRequest = nil
         finalTimeout?.cancel(); finalTimeout = nil; networkTask?.cancel(); networkTask = nil
         deleteRecording(); target = nil; partial = ""; phase = showMessage ? "Canceled" : "Ready"; onBusyChange(false)
@@ -375,7 +505,11 @@ import DoclinCore
     }
     func clearTranscript() { transcript = ""; originalTranscript = ""; partial = "" }
     @objc private func sleeping() { cancel() }
-    func shutdown() { permissionTimer?.invalidate(); permissionTimer = nil; stopIndicatorPreview(); cancel(showMessage: false); hotkey.unregister(); panel?.orderOut(nil); NSWorkspace.shared.notificationCenter.removeObserver(self) }
+    func shutdown() {
+        settings.enabled = false
+        if #available(macOS 26.0, *), let session = preparedModernSession as? ModernDictation { session.cancel() }
+        preparedModernSession = nil
+        permissionTimer?.invalidate(); permissionTimer = nil; stopIndicatorPreview(); cancel(showMessage: false); hotkey.unregister(); panel?.orderOut(nil); NSWorkspace.shared.notificationCenter.removeObserver(self) }
     func indicatorAction() {
         if indicatorPreview { stopIndicatorPreview(); return }
         if recording { finish() }
@@ -426,7 +560,7 @@ import DoclinCore
     private func showHUD(reposition: Bool = true) {
         guard hudPresented || indicatorPreview else { return }
         if panel == nil {
-            let p = DictationPanel(contentRect: NSRect(x: 0, y: 0, width: 380, height: indicatorHeight), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+            let p = DictationPanel(contentRect: NSRect(x: 0, y: 0, width: indicatorWidth, height: indicatorHeight), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
             p.title = "Doclin Dictation"
             p.isFloatingPanel = true; p.level = .floating; p.hidesOnDeactivate = false; p.isOpaque = false; p.backgroundColor = .clear; p.hasShadow = true
             p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
@@ -435,7 +569,7 @@ import DoclinCore
         guard let panel else { return }
         let screen = (!reposition ? panel.screen : nil) ?? NSScreen.screens.first(where: { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) }) ?? NSScreen.main
         if let frame = screen?.visibleFrame {
-            let rect = NSRect(x: frame.midX - 190, y: frame.minY + 18, width: 380, height: indicatorHeight)
+            let rect = NSRect(x: frame.midX - indicatorWidth / 2, y: frame.minY + 18, width: indicatorWidth, height: indicatorHeight)
             if panel.frame != rect { panel.setFrame(rect, display: true) }
         }
         if !panel.isVisible { panel.orderFrontRegardless() }

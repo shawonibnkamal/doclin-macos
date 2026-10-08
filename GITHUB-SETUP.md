@@ -1,21 +1,18 @@
-# Restoring the private GitHub checkout
+# Source checkout setup
 
-The macOS app source lives in the private `shawonibnkamal/doclin-macos` repository.
-Generated application bundles and build output are excluded from Git.
-
-The large, pinned voice dependencies are preserved in the private
-`voice-dependencies-v1` release. Restore them from the repository root before
-running `scripts/build.sh`:
+Builds no longer require access to a private voice-dependency release.
+From the repository root, run:
 
 ```sh
-mkdir -p .build/voice-download
-gh release download voice-dependencies-v1 --repo shawonibnkamal/doclin-macos \
-  --pattern 'voice-dependencies.tar.gz*' --dir .build/voice-download
-(cd .build/voice-download && shasum -a 256 -c voice-dependencies.tar.gz.sha256)
-tar -xzf .build/voice-download/voice-dependencies.tar.gz -C .
-scripts/build.sh
+python3 scripts/voice/fetch.py
+swift run DoclinChecks
+SIGN_IDENTITY=- ./scripts/build.sh
 ```
 
-The archive contains `vendor/voice`, including the original model, universal
-libraries, upstream source archives, headers, licenses, and checksum manifest.
-Access to the private repository is required to download it.
+The dependency script downloads pinned public upstream archives, verifies
+checksums, and builds universal voice runtime libraries. See [README](README.md)
+and [packaging](PACKAGING.md) for local permissions and public distribution.
+
+Never add API keys, signing identities, generated app bundles, personal session
+files or model weights to Git. Model/runtime dependencies are downloaded during
+build setup; their notices and source archives are preserved in packaged apps.

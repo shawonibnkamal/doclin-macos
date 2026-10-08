@@ -1,0 +1,15 @@
+name: Source checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  swift:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check core and mocked cloud behavior
+        run: swift run DoclinChecks
+      - name: Compile the native app
+        run: swift build --product Doclin

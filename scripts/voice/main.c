@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (c) 2026 Shawon Kamal
 // Private stdin carries notification text. Only local model/output paths are arguments.
 #include "sherpa-onnx/c-api/c-api.h"
 #include <stdio.h>
@@ -6,7 +8,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 int main(int argc, char **argv) {
-  if (argc != 4) return 2;
+  if (argc != 4 && argc != 5) return 2;
+  int speaker = 3;
+  if (argc == 5) {
+    char *end = NULL; long sid = strtol(argv[4], &end, 10);
+    if (!*argv[4] || *end || (sid != 2 && sid != 3 && sid != 16 && sid != 22)) return 2;
+    speaker = (int)sid;
+  }
   umask(0077);
   char text[4097]; size_t n = fread(text, 1, 4096, stdin);
   if (!n || !feof(stdin)) return 2;
@@ -19,7 +27,7 @@ int main(int argc, char **argv) {
   snprintf(voices,sizeof(voices),"%s/voices.bin",argv[1]);
   snprintf(tokens,sizeof(tokens),"%s/tokens.txt",argv[1]);
   snprintf(data,sizeof(data),"%s/espeak-ng-data",argv[1]);
-  snprintf(lexicon,sizeof(lexicon),"%s/lexicon-us-en.txt",argv[1]);
+  snprintf(lexicon,sizeof(lexicon),"%s/%s",argv[1],speaker == 22 ? "lexicon-gb-en.txt" : "lexicon-us-en.txt");
   SherpaOnnxOfflineTtsConfig cfg = {0};
   cfg.model.kokoro.model=model; cfg.model.kokoro.voices=voices;
   cfg.model.kokoro.tokens=tokens; cfg.model.kokoro.data_dir=data;
@@ -28,8 +36,8 @@ int main(int argc, char **argv) {
   cfg.max_num_sentences=1; cfg.silence_scale=0.2f;
   const SherpaOnnxOfflineTts *tts = SherpaOnnxCreateOfflineTts(&cfg);
   if (!tts) return 3;
-  // af_heart: one consistent, warm American English voice.
-  const SherpaOnnxGeneratedAudio *audio = SherpaOnnxOfflineTtsGenerate(tts,text,3,speed);
+  // Only the bundled, verified English speakers are accepted.
+  const SherpaOnnxGeneratedAudio *audio = SherpaOnnxOfflineTtsGenerate(tts,text,speaker,speed);
   int ok=audio && audio->n > 0 && SherpaOnnxWriteWave(audio->samples,audio->n,audio->sample_rate,argv[2]);
   if(audio) SherpaOnnxDestroyOfflineTtsGeneratedAudio(audio);
   SherpaOnnxDestroyOfflineTts(tts);

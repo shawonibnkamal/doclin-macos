@@ -1,0 +1,38 @@
+[
+  {
+    "actual" : "Please review the whole proposal before Friday. Keep the original files and send me a short summary.",
+    "expected" : "Please review the whole proposal before Friday. Keep the original files and send me a short summary.",
+    "id" : "ordinary",
+    "referenceWords" : 17,
+    "releaseToFinalMS" : 103,
+    "startupMS" : 74,
+    "wordErrors" : 0
+  },
+  {
+    "actual" : "Open Dockland and ask Claude to review the code exchanges for succession AI.",
+    "expected" : "Open Doclin and ask Claude to review the Codex changes for Succession AI.",
+    "id" : "names",
+    "referenceWords" : 13,
+    "releaseToFinalMS" : 147,
+    "startupMS" : 37,
+    "wordErrors" : 3
+  },
+  {
+    "actual" : "Do not deploy these changes. The payment is $50, not $15. Nothing has been approved.",
+    "expected" : "Do not deploy these changes. The payment is fifty dollars, not fifteen dollars. Nothing has been approved.",
+    "id" : "negation",
+    "referenceWords" : 17,
+    "releaseToFinalMS" : 61,
+    "startupMS" : 42,
+    "wordErrors" : 4
+  },
+  {
+    "actual" : "Scheduled a meeting for Tuesday, actually Wednesday, at 3 in the afternoon. Um, please include the finance team.",
+    "expected" : "Schedule the meeting for Tuesday, actually Wednesday, at three in the afternoon. Um, please include the finance team.",
+    "id" : "correction",
+    "referenceWords" : 18,
+    "releaseToFinalMS" : 55,
+    "startupMS" : 36,
+    "wordErrors" : 3
+  }
+]

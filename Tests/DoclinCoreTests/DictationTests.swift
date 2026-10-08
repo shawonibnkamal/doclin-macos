@@ -2,6 +2,30 @@ import Foundation
 import DoclinCore
 
 extension CoreTests {
+    func testLocalVoiceSettingsMigrateAutomaticAndPreserveExplicitChoice() throws {
+        var p = Preferences(); p.systemVoice = ""; try p.save()
+        XCTAssertEqual(Preferences.load().systemVoice, "kokoro:2")
+        p.systemVoice = "kokoro:3"; try p.save()
+        XCTAssertEqual(Preferences.load().systemVoice, "kokoro:3")
+        p.systemVoice = "explicit-mac-voice"; try p.save()
+        XCTAssertEqual(Preferences.load().systemVoice, "explicit-mac-voice")
+        XCTAssertEqual(LocalVoiceChoice.speaker(for: "kokoro:16"), 16)
+        XCTAssertNil(LocalVoiceChoice.speaker(for: "kokoro:99"))
+        XCTAssertEqual(LocalVoiceChoice.spoken("Changes are ready"), "Changes are ready.")
+        XCTAssertEqual(LocalVoiceChoice.spoken("Do not deploy!"), "Do not deploy!")
+    }
+
+    func testTimedTranscriptKeepsFinalRangesAndRevisesOnlyActiveWords() {
+        var b = TimedTranscript()
+        XCTAssertEqual(b.update("Please review.", start: 0, end: 2, final: true), "Please review.")
+        XCTAssertEqual(b.update(" Fifteen", start: 3, end: 4, final: false), "Please review. Fifteen")
+        XCTAssertEqual(b.update(" Fifty records.", start: 3, end: 5, final: true), "Please review. Fifty records.")
+        XCTAssertEqual(b.update(" Fifteen", start: 3, end: 4, final: false), "Please review. Fifty records.")
+        XCTAssertEqual(b.update(" Thank you.", start: 7, end: 9, final: true), "Please review. Fifty records. Thank you.")
+        XCTAssertEqual(b.update(" Thank you.", start: 7, end: 9, final: true), "Please review. Fifty records. Thank you.")
+        XCTAssertEqual(b.update(" Thank you.", start: 10, end: 12, final: true), "Please review. Fifty records. Thank you. Thank you.")
+        XCTAssertEqual(b.update("Invalid", start: .nan, end: 15, final: true), "Please review. Fifty records. Thank you. Thank you.")
+    }
     func testTranscriptKeepsPhrasesAcrossPauses() {
         var b = TranscriptBuffer()
         XCTAssertEqual(b.update("Please review the whole proposal.", completedUtterance: true, start: 0), "Please review the whole proposal.")

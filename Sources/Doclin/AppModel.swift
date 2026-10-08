@@ -160,13 +160,23 @@ struct Announcement: Identifiable {
                 } catch { if valid(ticket) { notice = error.localizedDescription } }
             }
             guard valid(ticket) else { return }
-            if preferences.systemVoice.isEmpty, LocalVoice.available {
+            if let speaker = LocalVoiceChoice.speaker(for: preferences.systemVoice) {
+                guard LocalVoice.available else {
+                    notice = "The local voice is unavailable. Update kept in Activity."
+                    stopCurrent(reason: "Voice unavailable"); startNext(); return
+                }
                 do {
-                    let audio = try await localVoice.synthesize(text, rate: preferences.rate)
+                    let audio = try await localVoice.synthesize(text, rate: preferences.rate, speaker: speaker)
                     guard valid(ticket) else { return }
-                    try playAudio(audio, mode: mode + " · Kokoro")
+                    try playAudio(audio, mode: mode + " · " + (LocalVoiceChoice.choices.first { $0.speaker == speaker }?.name ?? "Kokoro"))
                     return
-                } catch { if valid(ticket) { notice = "Using the Mac fallback voice for this update." } }
+                } catch {
+                    if valid(ticket) {
+                        notice = "The local voice could not play. Update kept in Activity."
+                        stopCurrent(reason: "Voice unavailable"); startNext()
+                    }
+                    return
+                }
             }
             guard valid(ticket) else { return }
             let utterance = AVSpeechUtterance(string: text)
