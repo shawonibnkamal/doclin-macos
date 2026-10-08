@@ -39,4 +39,3 @@ Recognition alone does not provide Wispr-style polishing. Rare product names sti
 - Preview-indicator action exercised in the native app. Its main-window screenshot excludes the separate floating panel, so a full visual screenshot of the panel is not claimed.
 - Right Command and foreground insertion still await renewed macOS Accessibility permission for the current build. Existing System Settings entry is on but the app reports untrusted; old signature requirements remain stale. No physical dictation or Wispr comparison is claimed.
 - Local privacy settings preserved: cloud transcription/cleanup remain off. No API key is configured in the installed app. The user was asked whether cloud processing is acceptable; no answer was received during this update.
-
