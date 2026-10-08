@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/doclin.png" width="112" alt="Doclin logo"></p>
+<p align="center"><img src="docs/assets/doclin-logo.png" width="112" alt="Doclin logo"></p>
 
 # Doclin
 
