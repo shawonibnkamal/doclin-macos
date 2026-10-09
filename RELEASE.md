@@ -1,7 +1,7 @@
-# Doclin 0.4.16 — Settings sidebar and aligned rows
+# Doclin 0.4.17 — Cleaner pages
 
-Settings uses a persistent category sidebar instead of accordions, with aligned label/control rows. Dictation, Voice, Agents, General, Cloud, Troubleshooting and Privacy are separate pages; long pages scroll independently of the sidebar.
+Removes repeated tab and sidebar headings and the helper text beneath the main status headings. Enabled toggles remain on the main Dictation and Agent updates pages, next to their status.
 
-The main Dictation and Agent updates pages retain their Enabled toggles. Preference, permission, cloud and connection controls remain in Settings. Existing preferences and paused dictation are preserved.
+Settings opens directly to its aligned rows. Existing preferences, privacy notices and paused dictation are preserved.
 
 Universal macOS 13+ development-signed preview, not Apple notarized.

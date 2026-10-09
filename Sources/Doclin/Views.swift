@@ -81,7 +81,6 @@ struct DoclinView: View {
     }
     private var settingsPage: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DoclinPageHeader("Settings", subtitle: "Everything you need to make Doclin yours.")
             HStack(alignment: .top, spacing: 16) {
                 VStack(spacing: 4) {
                     ForEach(settingsDestinations, id: \.2) { item in
@@ -92,8 +91,6 @@ struct DoclinView: View {
                 }.frame(width: 152)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(settingsDestinations.first(where: { $0.2 == selectedSettingsRoute })?.0 ?? "Voice")
-                            .font(.system(size: 17, weight: .semibold))
                         switch selectedSettingsRoute {
                         case "Dictation settings": DictationSettingsView(controller: model.dictation, model: model)
                         case "Connections": connections
@@ -110,19 +107,15 @@ struct DoclinView: View {
     }
     private var activity: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DoclinPageHeader("Agent updates", subtitle: "Your recent spoken updates, newest first.") {
-                Toggle("Enabled", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
-                    if model.preferences.muted != !enabled { model.toggleMute() }
-                })).toggleStyle(.switch).controlSize(.small)
-            }
             DoclinCard {
                 HStack {
                     Text(model.preferences.muted ? "Announcements paused" : model.status).font(.system(size: 15, weight: .semibold))
                     Spacer()
+                    Toggle("Enabled", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
+                        if model.preferences.muted != !enabled { model.toggleMute() }
+                    })).toggleStyle(.switch).controlSize(.small)
                     if model.speaking || model.pendingCount > 0 { Button("Stop") { model.stopAll() } }
                 }
-                Text(model.preferences.muted ? "Turn on announcements when you're ready." : "Hear when your connected agents finish or need attention.")
-                    .font(.system(size: 13)).foregroundColor(mutedInk)
             }
             DoclinHistoryCard(title: "Recent updates", emptyMessage: "New Codex and Claude updates appear here.", isEmpty: model.history.isEmpty, clear: { model.clearHistory() }) {
                 ForEach(model.history) { row in
@@ -245,30 +238,6 @@ struct DoclinButton: ButtonStyle {
 struct DoclinTabButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.opacity(configuration.isPressed ? 0.65 : 1).contentShape(Rectangle())
-    }
-}
-// Shared page structure keeps all three tabs aligned without adding navigation.
-struct DoclinPageHeader<Trailing: View>: View {
-    let title: String
-    let subtitle: String
-    let trailing: Trailing
-    init(_ title: String, subtitle: String, @ViewBuilder trailing: () -> Trailing) {
-        self.title = title; self.subtitle = subtitle; self.trailing = trailing()
-    }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(title).font(.system(size: 24, weight: .semibold))
-                Spacer()
-                trailing
-            }.frame(minHeight: 30)
-            Text(subtitle).font(.system(size: 13)).foregroundColor(mutedInk)
-        }.frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-extension DoclinPageHeader where Trailing == EmptyView {
-    init(_ title: String, subtitle: String) {
-        self.init(title, subtitle: subtitle) { EmptyView() }
     }
 }
 struct DoclinCard<Content: View>: View {
