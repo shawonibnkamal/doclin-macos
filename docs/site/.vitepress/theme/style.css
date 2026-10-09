@@ -136,3 +136,21 @@
 .DocSearch {
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
+
+.doclin-home { max-width: 840px; margin: 58px auto 42px; padding: 0 24px; text-align: center; }
+.doclin-home h1 { font-size: clamp(36px, 6vw, 56px); line-height: 1.1; letter-spacing: -.035em; font-weight: 650; }
+.doclin-home .lead { font-size: 19px; line-height: 1.5; color: var(--vp-c-text-2); margin: 20px 0 28px; }
+.doclin-home .download { display: inline-block; background: #416cc7; color: white; border-radius: 9px; padding: 13px 22px; font-size: 16px; font-weight: 600; text-decoration: none; }
+.doclin-home .download:hover { background: #345ab0; }
+.doclin-home .download:focus-visible { outline: 3px solid #53a4f4; outline-offset: 4px; }
+.doclin-home .download-note, .doclin-home .small-links { font-size: 13px; color: var(--vp-c-text-2); margin: 10px 0; }
+.doclin-home .small-links a, .doclin-home .privacy-note a { color: var(--vp-c-brand-1); text-decoration: underline; text-underline-offset: 3px; }
+.doclin-home .app-shot { display: block; width: min(100%, 670px); height: auto; margin: 34px auto 26px; border: 1px solid var(--vp-c-divider); border-radius: 14px; box-shadow: 0 12px 38px #14263812; }
+.doclin-home .how-it-works { display: flex; justify-content: center; gap: 30px; font-size: 15px; }
+.doclin-home .how-it-works b { margin-right: 7px; color: var(--vp-c-brand-1); }
+.doclin-home .privacy-note { font-size: 13px; color: var(--vp-c-text-2); margin-top: 20px; }
+@media(max-width: 560px) { .doclin-home { margin-top: 38px; padding: 0 20px; } .doclin-home .lead { font-size: 17px; } .doclin-home .how-it-works { flex-direction: column; gap: 8px; } }
+
+.doclin-home .agent-details { margin: 22px auto 0; font-size: 14px; color: var(--vp-c-text-2); }
+.doclin-home .agent-details summary { cursor: pointer; color: var(--vp-c-brand-1); }
+.doclin-home .agent-details summary:focus-visible { outline: 2px solid #53a4f4; outline-offset: 4px; }

@@ -165,6 +165,7 @@ import DoclinCore
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
     }
     func openMicrophoneSettings() { NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")!) }
+    func openSpeechSettings() { NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_SpeechRecognition")!) }
     func saveSettings() {
         cancel(showMessage: false)
         do { try settings.save() } catch { message = "Could not save dictation settings." }

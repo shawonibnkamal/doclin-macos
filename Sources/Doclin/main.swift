@@ -42,13 +42,13 @@ if CommandLine.arguments.contains("--doclin-hook") {
         }
         editRoot.submenu = edit; mainMenu.addItem(editRoot); NSApp.mainMenu = mainMenu
         model = AppModel()
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 970, height: 720), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 700, height: 620), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         model.dictation.openSettings = { [weak self] in self?.showDictation() }
         window.title = "Doclin"
         window.titlebarAppearsTransparent = true
-        window.backgroundColor = NSColor(calibratedRed: 0.96, green: 0.965, blue: 0.95, alpha: 1)
+        window.backgroundColor = NSColor(calibratedRed: 0.965, green: 0.975, blue: 0.99, alpha: 1)
         window.contentView = NSHostingView(rootView: DoclinView(model: model))
-        window.minSize = NSSize(width: 910, height: 690)
+        window.minSize = NSSize(width: 640, height: 560)
         window.isReleasedWhenClosed = false; window.center()
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = NSImage(systemSymbolName: "waveform", accessibilityDescription: "Doclin")

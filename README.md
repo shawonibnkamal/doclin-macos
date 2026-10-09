@@ -14,6 +14,16 @@ Doclin is an early preview. We do not claim better accuracy than Wispr Flow.
 Names, spoken corrections, and insertion into some editors still need work.
 See [dictation checks and limitations](DICTATION-QUALITY-QA.md).
 
+## Download for Mac
+
+[Download Doclin 0.4.8](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.8/Doclin-0.4.8-mac.zip).
+Unzip, move Doclin.app to Applications, and turn on Dictation. Allow Microphone
+and Accessibility, then hold Right Command in a text field to speak.
+
+This is a certificate-backed preview without Apple notarization. macOS may
+block opening it. Review the blocked app in System Settings → Privacy & Security;
+do not disable Gatekeeper. Clean-Mac installation remains unverified.
+
 ## Build from source
 
 Requires macOS, Python 3 for dependency setup, and Apple's Command Line Tools.
@@ -35,8 +45,7 @@ Git. Python is not needed by people running a packaged app.
 
 The source build is an ad-hoc preview. Rebuilding it can invalidate macOS
 permission grants. Keep daily use on a stable certificate-backed build; see
-[packaging and signing](PACKAGING.md). Public signed/notarized downloads are
-not available yet. Do not disable Gatekeeper to install Doclin.
+[packaging and signing](PACKAGING.md). The downloadable preview is not notarized. Do not disable Gatekeeper to install Doclin.
 
 ## Use dictation
 
