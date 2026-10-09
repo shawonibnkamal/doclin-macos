@@ -8,6 +8,10 @@ private let accent = Color(red: 0.255, green: 0.424, blue: 0.78)
 private let mutedInk = Color(red: 0.40, green: 0.46, blue: 0.54)
 
 struct DoclinView: View {
+    private static let logo: NSImage? = {
+        guard let url = Bundle.main.url(forResource: "DoclinLogo", withExtension: "png") else { return nil }
+        return NSImage(contentsOf: url)
+    }()
     @ObservedObject var model: AppModel
     @State private var apiKey = ""
     @State private var codexPath = ""
@@ -19,7 +23,7 @@ struct DoclinView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                if let path = Bundle.main.url(forResource: "DoclinLogo", withExtension: "png"), let logo = NSImage(contentsOf: path) {
+                if let logo = Self.logo {
                     Image(nsImage: logo).resizable().scaledToFit().frame(width: 24, height: 24)
                 } else {
                     Image(systemName: "waveform").foregroundColor(accent)
@@ -68,7 +72,7 @@ struct DoclinView: View {
     }
     private func settingSection<Content: View>(_ title: String, systemImage: String, route: String, @ViewBuilder content: @escaping () -> Content) -> some View {
         DisclosureGroup(isExpanded: Binding(get: { model.tab == route }, set: { model.tab = $0 ? route : "Settings" })) {
-            content().padding(.top, 12)
+            if model.tab == route { content().padding(.top, 12) }
         } label: {
             Label(title, systemImage: systemImage).font(.system(size: 14, weight: .medium))
         }.padding(16).background(Color.white, in: RoundedRectangle(cornerRadius: 10))

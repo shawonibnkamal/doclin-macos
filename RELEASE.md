@@ -1,5 +1,5 @@
-# Doclin 0.4.12 — Reliable tab clicks
+# Doclin 0.4.13 — Faster tab rendering
 
-The whole Dictation, Agent updates and Settings tab is now clickable, including blank space around its label. Previously the plain SwiftUI buttons only responded around their text. The layout stays unchanged.
+The app header uses a cached 96-pixel logo instead of repeatedly decoding the original 7,400-pixel artwork. Closed Settings sections no longer construct hidden controls or query system voices; the voice catalog is cached after first use. Unchanged permission polling results no longer trigger redraws. Layout and click targets stay unchanged.
 
-Validation: reproduced missed clicks outside labels, checked edge and corner clicks on all three tabs in the signed app, universal build, strict signature verification and core/cloud checks. Dictation remains paused on the installed Mac. Development-signed preview, not notarized.
+Validation: main-thread sampling during real tab switches before and after, native navigation and Settings controls, universal signed build and strict signature verification, core/cloud checks. Dictation remains paused on the installed Mac. Development-signed preview, not notarized.
