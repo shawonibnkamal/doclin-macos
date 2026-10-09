@@ -151,10 +151,6 @@
 .doclin-home .privacy-note { font-size: 13px; color: var(--vp-c-text-2); margin-top: 20px; }
 @media(max-width: 560px) { .doclin-home { margin-top: 38px; padding: 0 20px; } .doclin-home .lead { font-size: 17px; } .doclin-home .how-it-works { flex-direction: column; gap: 8px; } }
 
-.doclin-home .agent-details { margin: 22px auto 0; font-size: 14px; color: var(--vp-c-text-2); }
-.doclin-home .agent-details summary { cursor: pointer; color: var(--vp-c-brand-1); }
-.doclin-home .agent-details summary:focus-visible { outline: 2px solid #53a4f4; outline-offset: 4px; }
-
 /* One dark palette across the landing, installation and privacy pages. */
 :root, .dark {
   color-scheme: dark;
@@ -174,3 +170,13 @@
 .doclin-home .download { background: #5cdaff; color: #111827; }
 .doclin-home .download:hover { background: #8be6ff; }
 .doclin-home .app-shot { box-shadow: 0 14px 44px #0006; }
+
+.doclin-home .product-preview { margin: 30px auto 26px; }
+.doclin-home .preview-selector { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--vp-c-divider); border-radius: 12px; background: #111827; }
+.doclin-home .preview-selector button { min-height: 44px; padding: 9px 18px; border-radius: 8px; color: var(--vp-c-text-2); font-size: 14px; font-weight: 600; cursor: pointer; }
+.doclin-home .preview-selector button[aria-pressed="true"] { background: #213348; color: #edf6ff; }
+.doclin-home .preview-selector button:hover { color: #5cdaff; }
+.doclin-home .preview-selector button:focus-visible { outline: 2px solid #5cdaff; outline-offset: 2px; }
+.doclin-home .product-preview .app-shot { margin-top: 18px; margin-bottom: 14px; }
+.doclin-home .preview-caption { font-size: 13px; line-height: 1.6; color: var(--vp-c-text-2); }
+.doclin-home .preview-caption span { color: var(--vp-c-text-3); }

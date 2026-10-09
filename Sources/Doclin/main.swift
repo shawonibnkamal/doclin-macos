@@ -59,10 +59,21 @@ if CommandLine.arguments.contains("--doclin-hook") {
         if CommandLine.arguments.contains("--ui-audit"),
            DoclinPaths.support.path.hasPrefix("/tmp/doclin-"), !model.dictation.settings.enabled,
            model.preferences.muted, !model.preferences.codexEnabled, !model.preferences.claudeEnabled {
-            for i in 1...4 {
-                model.dictation.history.record(id: UUID(), text: "Dictation sample \(i). Keep the number 123 and the project name Doclin.", original: "dictation sample \(i) keep the number 123 and the project name Doclin", destination: "Notes", timestamp: Date().addingTimeInterval(Double(i)))
-                let event = AgentEvent(source: i % 2 == 0 ? "Codex" : "Claude", session: "ui-audit-\(i)", text: "Sample update \(i). Tests pass and the task is ready for review.", timestamp: Date().addingTimeInterval(Double(i)))
-                model.history.insert(Announcement(id: UUID(), event: event, text: event.text, state: "Spoken", mode: "Local"), at: 0)
+            let dictations = [
+                ("Notes", "Make the settings simpler: one sidebar, clear labels, and no repeated headings."),
+                ("Mail", "Hi Alex, the new build is ready. Could you try the Mac version and send me your feedback?")
+            ]
+            for (i, sample) in dictations.enumerated().reversed() {
+                model.dictation.history.record(id: UUID(), text: sample.1, original: sample.1, destination: sample.0, timestamp: Date().addingTimeInterval(Double(-120 * (i + 1))))
+            }
+            let updates = [
+                ("Codex", "The settings page is ready. The sidebar and keyboard navigation are working."),
+                ("Claude", "All tests pass. I fixed the download link and updated the screenshots."),
+                ("Codex", "The new layout is ready for review. Both pages now use the same controls.")
+            ]
+            for (i, sample) in updates.enumerated() {
+                let event = AgentEvent(source: sample.0, session: "ui-audit-\(i)", text: sample.1, timestamp: Date().addingTimeInterval(Double(-120 * (i + 1))))
+                model.history.append(Announcement(id: UUID(), event: event, text: event.text, state: "Spoken", mode: "Local"))
             }
         }
         #endif
