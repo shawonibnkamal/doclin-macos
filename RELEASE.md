@@ -1,5 +1,7 @@
-# Doclin 0.4.11 — Navy Dock icon
+# Doclin 0.4.11 — Consistent controls and dark website
 
-The rounded Dock tile now uses deep navy (#111827), giving the original cyan logo stronger contrast. Icon size, inset, and the light app interface stay unchanged.
+Agent updates now uses the same Enabled switch as Dictation. Voice preview and agent connections remain beside the status; the duplicate header speaker control is removed. The switch preserves the existing announcement mute behavior.
 
-Resource-only update retaining the verified universal executable and voice runtime. Rendered at Dock size, generated all ICNS sizes, verified the code signature, and relaunched the installed app. Development-signed preview, not notarized.
+The rounded Dock tile uses deep navy (#111827), keeping its size and inset. The website stays in dark mode with readable text and a cyan download button; the app interface stays light.
+
+Universal Mac preview, development-signed and not notarized. Native UI and persisted switches, website rendering, core/cloud checks, universal build and strict signature validation checked. Dictation remains paused on the installed Mac.

@@ -26,10 +26,6 @@ struct DoclinView: View {
                 }
                 Text("Doclin").font(.system(size: 17, weight: .semibold))
                 Spacer()
-                Button { model.toggleMute() } label: {
-                    Image(systemName: model.preferences.muted ? "speaker.slash" : "speaker.wave.2")
-                }.buttonStyle(.plain).help(model.preferences.muted ? "Resume agent announcements" : "Pause agent announcements")
-                .accessibilityLabel(model.preferences.muted ? "Resume announcements" : "Pause announcements")
             }.padding(.horizontal, 24).padding(.top, 18).padding(.bottom, 16)
             HStack(spacing: 6) {
                 ForEach(["Dictation", "Activity", "Settings"], id: \.self) { name in
@@ -81,12 +77,15 @@ struct DoclinView: View {
             HStack {
                 Text("Agent updates").font(.system(size: 24, weight: .semibold))
                 Spacer()
-                Button("Preview voice") { model.preview() }
+                Toggle("Enabled", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
+                    if model.preferences.muted != !enabled { model.toggleMute() }
+                })).toggleStyle(.switch).controlSize(.small)
             }
             HStack {
                 Text(model.preferences.muted ? "Announcements paused" : model.status).font(.system(size: 12)).foregroundColor(mutedInk)
                 Spacer()
                 if model.speaking || model.pendingCount > 0 { Button("Stop") { model.stopAll() } }
+                Button("Preview voice") { model.preview() }.disabled(model.preferences.muted)
                 Button("Connect agents") { model.tab = "Connections" }
             }
             if model.history.isEmpty {
@@ -193,7 +192,7 @@ struct DoclinView: View {
                 }
                 Button("Clear recent announcements") { model.clearHistory() }
             }
-            Text("Doclin 0.4.8 · macOS 13 or later\nPersonal preview build. Public distribution requires Developer ID signing and notarization.").font(.system(size: 11)).foregroundColor(mutedInk).lineSpacing(4)
+            Text("Doclin \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "development") · macOS 13 or later\nPersonal preview build. Public distribution requires Developer ID signing and notarization.").font(.system(size: 11)).foregroundColor(mutedInk).lineSpacing(4)
         }
     }
     private func binding<T>(_ path: WritableKeyPath<Preferences, T>) -> Binding<T> {
