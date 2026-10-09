@@ -12,6 +12,8 @@ let support = FileManager.default.temporaryDirectory.appendingPathComponent("doc
 setenv("DOCLIN_SUPPORT_DIR", support.path, 1)
 let suite = CoreTests()
 let checks: [(String, () throws -> Void)] = [
+("testDictationHistoryRetainsSessionsWithoutDuplicatesOrEmptyText", suite.testDictationHistoryRetainsSessionsWithoutDuplicatesOrEmptyText),
+("testDictationHistoryEditsKeepOriginalAndClearingIsSessionOnly", suite.testDictationHistoryEditsKeepOriginalAndClearingIsSessionOnly),
 ("testLocalVoiceSettingsMigrateAutomaticAndPreserveExplicitChoice", suite.testLocalVoiceSettingsMigrateAutomaticAndPreserveExplicitChoice),
 ("testTimedTranscriptKeepsFinalRangesAndRevisesOnlyActiveWords", suite.testTimedTranscriptKeepsFinalRangesAndRevisesOnlyActiveWords),
 ("testTranscriptRepetitionDoesNotEraseEarlierPhrases", suite.testTranscriptRepetitionDoesNotEraseEarlierPhrases),

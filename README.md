@@ -16,8 +16,8 @@ See [dictation checks and limitations](DICTATION-QUALITY-QA.md).
 
 ## Download for Mac
 
-[Download Doclin 0.4.14](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.14/Doclin-0.4.14-mac.zip).
-Unzip, move Doclin.app to Applications, and turn on Dictation. Allow Microphone
+[Download Doclin 0.4.15](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.15/Doclin-0.4.15-mac.zip).
+Unzip, move Doclin.app to Applications, and enable dictation in Settings → Dictation. Allow Microphone
 and Accessibility, then hold Right Command in a text field to speak.
 
 This is a certificate-backed preview without Apple notarization. macOS may
@@ -49,7 +49,7 @@ permission grants. Keep daily use on a stable certificate-backed build; see
 
 ## Use dictation
 
-1. Open **Dictation**, enable dictation, and grant Microphone access.
+1. Open **Settings → Dictation**, enable dictation, and grant Microphone access.
 2. Grant Accessibility for Right Command and automatic insertion, then Refresh.
    The older recognizer also needs Speech Recognition permission.
 3. Focus a text field, hold **Right Command**, speak, then release.
@@ -61,10 +61,14 @@ Alternative shortcuts are available if another dictation app uses Right Command.
 The recording limit is five minutes with enhanced recognition, 55 seconds with
 legacy local recognition, and 90 seconds with optional OpenAI transcription.
 
+The Dictation and Agent updates tabs list the last 30 entries from this session.
+Copy or edit dictated text there. Histories stay in memory and clear on quit.
+All preferences, permissions, connections, and voice previews live in Settings.
+
 ## Spoken agent updates
 
 Codex desktop/CLI session files are observed locally. Only fresh completions
-are announced. Connect Claude Code in **Connections** to add Doclin's two
+are announced. Connect Claude Code in **Settings → Agents** to add Doclin's two
 hooks; unrelated hooks and settings are preserved. Existing sessions may need
 restarting. Pause other narration apps to avoid duplicate speech.
 
