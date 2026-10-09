@@ -67,8 +67,8 @@ struct DoclinView: View {
         .onAppear { codexPath = model.preferences.codexHome }
     }
     private var settingsPage: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Settings").font(.system(size: 24, weight: .semibold)).padding(.bottom, 4)
+        VStack(alignment: .leading, spacing: 16) {
+            DoclinPageHeader("Settings", subtitle: "Choose your voice, connected agents, and preferences.")
             settingSection("Voice", systemImage: "speaker.wave.2", route: "Voice & AI") { voiceSettings }
             settingSection("Agents", systemImage: "terminal", route: "Connections") { connections }
             settingSection("General", systemImage: "slider.horizontal.3", route: "Preferences") { preferences }
@@ -79,51 +79,57 @@ struct DoclinView: View {
             if model.tab == route { content().padding(.top, 12).padding(.horizontal, 16) }
         } label: {
             Label(title, systemImage: systemImage).font(.system(size: 14, weight: .medium))
-        }.background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+        }.doclinSurface()
     }
     private var activity: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Agent updates").font(.system(size: 24, weight: .semibold))
-                Spacer()
+            DoclinPageHeader("Agent updates", subtitle: "Hear when your agents finish or need your attention.") {
                 Toggle("Enabled", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
                     if model.preferences.muted != !enabled { model.toggleMute() }
                 })).toggleStyle(.switch).controlSize(.small)
             }
-            HStack {
-                Text(model.preferences.muted ? "Announcements paused" : model.status).font(.system(size: 12)).foregroundColor(mutedInk)
-                Spacer()
-                if model.speaking || model.pendingCount > 0 { Button("Stop") { model.stopAll() } }
-                Button("Preview voice") { model.preview() }.disabled(model.preferences.muted)
-                Button("Connect agents") { model.tab = "Connections" }
-            }
-            if model.history.isEmpty {
-                Text("New Codex and Claude updates appear here.").font(.system(size: 14)).foregroundColor(mutedInk).padding(.vertical, 32)
-            } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(model.history.prefix(allUpdates ? model.history.count : 3))) { row in
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Text(row.event.source).font(.system(size: 11, weight: .medium))
-                                Text(row.state).font(.system(size: 11)).foregroundColor(mutedInk)
-                                Spacer()
-                                Text(row.event.timestamp, style: .time).font(.system(size: 11)).foregroundColor(mutedInk)
-                            }
-                            Text(row.text).font(.system(size: 14)).textSelection(.enabled)
-                        }.padding(.vertical, 13)
-                        Divider()
-                    }
-                }
+            DoclinCard {
+                Text(model.preferences.muted ? "Announcements paused" : model.status)
+                    .font(.system(size: 15, weight: .semibold))
+                Text("Listen to a sample or manage your connected agents.")
+                    .font(.system(size: 13)).foregroundColor(mutedInk)
                 HStack {
-                    if model.history.count > 3 { Button(allUpdates ? "Show less" : "Show all updates") { allUpdates.toggle() } }
+                    Button("Preview voice") { model.preview() }.buttonStyle(DoclinButton()).disabled(model.preferences.muted)
+                    Button("Connect agents") { model.tab = "Connections" }
                     Spacer()
-                    Button("Clear") { model.clearHistory() }
-                }.font(.system(size: 12))
+                    if model.speaking || model.pendingCount > 0 { Button("Stop") { model.stopAll() } }
+                }
+            }
+            DoclinCard {
+                Text("Recent updates").font(.system(size: 15, weight: .semibold))
+                if model.history.isEmpty {
+                    Text("New Codex and Claude updates appear here.").font(.system(size: 13)).foregroundColor(mutedInk).padding(.vertical, 16).frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(Array(model.history.prefix(allUpdates ? model.history.count : 3))) { row in
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Text(row.event.source).font(.system(size: 11, weight: .medium))
+                                    Text(row.state).font(.system(size: 11)).foregroundColor(mutedInk)
+                                    Spacer()
+                                    Text(row.event.timestamp, style: .time).font(.system(size: 11)).foregroundColor(mutedInk)
+                                }
+                                Text(row.text).font(.system(size: 14)).textSelection(.enabled)
+                            }.padding(.vertical, 13)
+                            Divider()
+                        }
+                    }
+                    HStack {
+                        if model.history.count > 3 { Button(allUpdates ? "Show less" : "Show all updates") { allUpdates.toggle() } }
+                        Spacer()
+                        Button("Clear") { model.clearHistory() }
+                    }.font(.system(size: 12))
+                }
             }
         }
     }
     private var connections: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 16) {
             card {
                 HStack { Label("Codex", systemImage: "terminal").font(.system(size: 17, weight: .semibold)); Spacer(); Toggle("Announce", isOn: binding(\.codexEnabled)).toggleStyle(.switch).controlSize(.small) }
                 Text("Desktop + CLI").font(.system(size: 12, weight: .medium)).foregroundColor(accent)
@@ -137,6 +143,7 @@ struct DoclinView: View {
                 }.onAppear { codexPath = model.preferences.codexHome }
                 Text("Desktop session formats can change. Unknown events are ignored.").font(.system(size: 10)).foregroundColor(mutedInk)
             }
+            Divider()
             card {
                 HStack { Label("Claude Code", systemImage: "asterisk").font(.system(size: 17, weight: .semibold)); Spacer(); Toggle("Announce", isOn: binding(\.claudeEnabled)).toggleStyle(.switch).controlSize(.small) }
                 Text(model.claudeInstalled ? "Hooks installed" : "One-time connection").font(.system(size: 12, weight: .medium)).foregroundColor(accent)
@@ -147,7 +154,7 @@ struct DoclinView: View {
         }
     }
     private var voiceSettings: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 16) {
             card {
                 Text("Local voice").font(.system(size: 15, weight: .semibold))
                 Text("Output: \(model.outputName)").font(.system(size: 12)).foregroundColor(mutedInk)
@@ -180,7 +187,7 @@ struct DoclinView: View {
         }
     }
     private var preferences: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 16) {
             card {
                 Toggle("Start Doclin at login", isOn: Binding(get: { model.loginEnabled }, set: { model.setLogin($0) }))
                 DisclosureGroup("Announcement settings") {
@@ -192,6 +199,7 @@ struct DoclinView: View {
                   }.padding(.top, 10)
                 }
             }
+            Divider()
             card {
                 Label("Your conversations stay yours", systemImage: "lock.shield").font(.system(size: 15, weight: .semibold))
                 Text("Local dictation and voices stay on your Mac. Optional cloud features send selected audio or text to OpenAI.").font(.system(size: 12)).foregroundColor(mutedInk).lineSpacing(4)
@@ -208,7 +216,7 @@ struct DoclinView: View {
         Binding(get: { model.preferences[keyPath: path] }, set: { model.preferences[keyPath: path] = $0; model.save() })
     }
     private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 12, content: content).padding(18).frame(maxWidth: .infinity, alignment: .leading).background(Color.white, in: RoundedRectangle(cornerRadius: 13))
+        VStack(alignment: .leading, spacing: 12, content: content).frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 struct DoclinButton: ButtonStyle {
@@ -249,5 +257,43 @@ private struct DoclinDisclosureRow: View {
                 .accessibilityValue(configuration.isExpanded ? "Expanded" : "Collapsed")
             if configuration.isExpanded { configuration.content.padding(.bottom, 12) }
         }
+    }
+}
+
+// Shared page structure keeps all three tabs aligned without adding navigation.
+struct DoclinPageHeader<Trailing: View>: View {
+    let title: String
+    let subtitle: String
+    let trailing: Trailing
+    init(_ title: String, subtitle: String, @ViewBuilder trailing: () -> Trailing) {
+        self.title = title; self.subtitle = subtitle; self.trailing = trailing()
+    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(title).font(.system(size: 24, weight: .semibold))
+                Spacer()
+                trailing
+            }.frame(minHeight: 30)
+            Text(subtitle).font(.system(size: 13)).foregroundColor(mutedInk)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+extension DoclinPageHeader where Trailing == EmptyView {
+    init(_ title: String, subtitle: String) {
+        self.init(title, subtitle: subtitle) { EmptyView() }
+    }
+}
+struct DoclinCard<Content: View>: View {
+    @ViewBuilder let content: Content
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) { content }
+            .padding(16).frame(maxWidth: .infinity, alignment: .leading).doclinSurface()
+    }
+}
+extension View {
+    func doclinSurface() -> some View {
+        background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(ink.opacity(0.06), lineWidth: 1).allowsHitTesting(false))
     }
 }

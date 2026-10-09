@@ -14,14 +14,12 @@ struct DictationView: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Dictation").font(.system(size: 24, weight: .semibold))
-                Spacer()
+            DoclinPageHeader("Dictation", subtitle: "Speak naturally. Your words appear where you work.") {
                 Toggle("Enabled", isOn: setting(\.enabled)).toggleStyle(.switch).controlSize(.small)
             }
-            VStack(alignment: .leading, spacing: 12) {
+            DoclinCard {
                 Text(controller.settings.enabled ? "Hold \(controller.shortcutLabel) to dictate" : "Turn on dictation to get started")
-                    .font(.system(size: 23, weight: .medium))
+                    .font(.system(size: 15, weight: .semibold))
                 Text(controller.settings.autoInsert ? "Speak, then release. Your words appear at your cursor." : "Speak, then release. Copy your words below.")
                     .font(.system(size: 13)).foregroundColor(.secondary)
                 HStack {
@@ -41,10 +39,10 @@ struct DictationView: View {
                             .font(.system(size: 11)).foregroundColor(.secondary)
                     }
                 }
-            }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(Color.white, in: RoundedRectangle(cornerRadius: 12))
+            }
             if needsSetup && controller.settings.enabled {
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack { Text("Finish setup").font(.system(size: 13, weight: .semibold)); Spacer(); Button("Refresh") { controller.refreshPermissions() } }
+                    HStack { Text("Finish setup").font(.system(size: 15, weight: .semibold)); Spacer(); Button("Refresh") { controller.refreshPermissions() } }
                     if !controller.microphoneGranted { permission("Microphone") { controller.requestMicrophone() } }
                     if controller.settings.provider == "local" && !controller.modernReady && !controller.speechGranted { permission("Speech Recognition") { controller.requestSpeech() } }
                     if needsAccessibility && !controller.accessibilityGranted { permission("Accessibility · shortcut and insertion") { controller.openAccessibility() } }
@@ -55,12 +53,12 @@ struct DictationView: View {
                     Text("Previously denied? Enable Doclin in System Settings. Without Accessibility, use Try here and copy.").font(.system(size: 11)).foregroundColor(.secondary)
                 }.padding(14).background(accent.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
             }
-            VStack(alignment: .leading, spacing: 8) {
+            DoclinCard {
                 if controller.busy && !controller.partial.isEmpty {
                     Text(controller.partial).font(.system(size: 14)).foregroundColor(accent).lineLimit(3).accessibilityLabel("Live transcript")
                 }
                 HStack {
-                    Text(controller.busy ? "Last transcript" : "Your text").font(.system(size: 13, weight: .semibold))
+                    Text(controller.busy ? "Last transcript" : "Your text").font(.system(size: 15, weight: .semibold))
                     Spacer()
                     Button("Copy") { controller.copyTranscript() }.disabled(controller.transcript.isEmpty)
                     Button("Clear") { controller.clearTranscript() }.disabled(controller.busy || controller.transcript.isEmpty)
@@ -114,8 +112,8 @@ struct DictationView: View {
                             Text("Transcript is kept in memory until cleared or quit. Local audio is not saved by Doclin.").font(.system(size: 11)).foregroundColor(.secondary)
                         }.padding(.top, 8)
                     }
-                }.padding(.top, 12)
-            }.font(.system(size: 12))
+                }.padding(.top, 12).padding(.horizontal, 16)
+            }.font(.system(size: 13, weight: .medium)).doclinSurface()
         }.onAppear { controller.refreshPermissions() }
     }
     private func permission(_ title: String, action: @escaping () -> Void) -> some View {
