@@ -8,7 +8,10 @@ struct DictationView: View {
     @State private var draft = ""
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DoclinPageHeader("Dictation", subtitle: "Your recent dictated text, newest first.")
+            DoclinPageHeader("Dictation", subtitle: "Your recent dictated text, newest first.") {
+                Toggle("Enabled", isOn: Binding(get: { controller.settings.enabled }, set: { controller.settings.enabled = $0; controller.saveSettings() }))
+                    .toggleStyle(.switch).controlSize(.small)
+            }
             DoclinCard {
                 HStack {
                     Text(controller.settings.enabled ? controller.busy ? controller.phase : "Hold \(controller.shortcutLabel) to dictate" : "Dictation paused")
@@ -16,7 +19,7 @@ struct DictationView: View {
                     Spacer()
                     if controller.busy { Text("\(controller.seconds)s").font(.system(size: 12)).monospacedDigit() }
                 }
-                Text(controller.settings.enabled ? controller.settings.autoInsert ? "Speak, then release. Your words appear at your cursor." : "Speak, then release. Copy your words from the list below." : "Enable dictation in Settings when you're ready.")
+                Text(controller.settings.enabled ? controller.settings.autoInsert ? "Speak, then release. Your words appear at your cursor." : "Speak, then release. Copy your words from the list below." : "Turn on dictation when you're ready.")
                     .font(.system(size: 13)).foregroundColor(.secondary)
                 HStack {
                     Label(controller.settings.provider == "local" ? "On-device speech" : "Audio sent to OpenAI", systemImage: controller.settings.provider == "local" ? "lock" : "cloud")

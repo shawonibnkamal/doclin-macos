@@ -1,7 +1,7 @@
-# Doclin 0.4.15 — History tabs and central settings
+# Doclin 0.4.16 — Settings sidebar and aligned rows
 
-Dictation and Agent updates now use matching session history lists with timestamps and states. The last 30 completed dictations remain in memory, including original words for editing and restoring. Both lists show every retained entry; neither has options or preference controls.
+Settings uses a persistent category sidebar instead of accordions, with aligned label/control rows. Dictation, Voice, Agents, General, Cloud, Troubleshooting and Privacy are separate pages; long pages scroll independently of the sidebar.
 
-Settings contains Dictation, Voice, Agents and General, including enable switches, voice previews, permissions and troubleshooting. Menu-bar dictation setup opens the new Settings section. Existing preferences and paused dictation are preserved. Histories clear on quit and are never written to disk.
+The main Dictation and Agent updates pages retain their Enabled toggles. Preference, permission, cloud and connection controls remain in Settings. Existing preferences and paused dictation are preserved.
 
 Universal macOS 13+ development-signed preview, not Apple notarized.

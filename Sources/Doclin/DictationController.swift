@@ -242,7 +242,7 @@ import DoclinCore
             guard modernReady || speechGranted else { message = "Allow Speech Recognition in Dictation settings first."; phase = "Speech permission needed"; hideIndicator(); openSettings(); return }
             guard onDeviceSupported else { message = "On-device recognition is unavailable for this language on this Mac. Choose another language or OpenAI transcription."; phase = "Language unavailable"; hideIndicator(); openSettings(); return }
         } else if keyProvider() == nil {
-            message = "Add your OpenAI API key in Voice & AI, or choose On this Mac."; phase = "API key needed"; hideIndicator(); openSettings(); return
+            message = "Add your OpenAI API key in Settings → Cloud, or choose On this Mac."; phase = "API key needed"; hideIndicator(); openSettings(); return
         }
         guard let ticket = lifecycle.begin() else { return }
         captureStartedAt = now(); releasedAt = 0; resolvedAt = 0; timing = ""; microphoneStarting = true

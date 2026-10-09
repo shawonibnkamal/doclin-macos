@@ -16,8 +16,8 @@ See [dictation checks and limitations](DICTATION-QUALITY-QA.md).
 
 ## Download for Mac
 
-[Download Doclin 0.4.15](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.15/Doclin-0.4.15-mac.zip).
-Unzip, move Doclin.app to Applications, and enable dictation in Settings → Dictation. Allow Microphone
+[Download Doclin 0.4.16](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.16/Doclin-0.4.16-mac.zip).
+Unzip, move Doclin.app to Applications, and enable dictation on the Dictation page. Allow Microphone
 and Accessibility, then hold Right Command in a text field to speak.
 
 This is a certificate-backed preview without Apple notarization. macOS may
@@ -49,7 +49,7 @@ permission grants. Keep daily use on a stable certificate-backed build; see
 
 ## Use dictation
 
-1. Open **Settings → Dictation**, enable dictation, and grant Microphone access.
+1. Open **Dictation**, enable dictation, and grant Microphone access under **Settings → Troubleshooting**.
 2. Grant Accessibility for Right Command and automatic insertion, then Refresh.
    The older recognizer also needs Speech Recognition permission.
 3. Focus a text field, hold **Right Command**, speak, then release.
@@ -63,7 +63,7 @@ legacy local recognition, and 90 seconds with optional OpenAI transcription.
 
 The Dictation and Agent updates tabs list the last 30 entries from this session.
 Copy or edit dictated text there. Histories stay in memory and clear on quit.
-All preferences, permissions, connections, and voice previews live in Settings.
+Settings uses a category sidebar with aligned rows for configuration, permissions, connections, and voice previews. Enabled toggles stay on the main Dictation and Agent updates pages.
 
 ## Spoken agent updates
 
