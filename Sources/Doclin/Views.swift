@@ -33,6 +33,7 @@ struct DoclinView: View {
                         Text(name == "Activity" ? "Agent updates" : name).font(.system(size: 13, weight: .medium))
                             .frame(maxWidth: .infinity).padding(.vertical, 9)
                             .background(section == name ? Color.white : .clear, in: RoundedRectangle(cornerRadius: 7))
+                            .contentShape(Rectangle())
                     }.buttonStyle(.plain)
                 }
             }.padding(4).background(ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
