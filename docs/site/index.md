@@ -5,7 +5,7 @@ layout: page
 <div class="doclin-home">
   <h1>Dictate text. Hear your agents.</h1>
   <p class="lead">Dictation and spoken coding updates for Mac. Free and local by default.</p>
-  <a class="download" href="https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.17/Doclin-0.4.17-mac.zip">Download Doclin for Mac</a>
+  <a class="download" href="https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.18/Doclin-0.4.18-mac.zip">Download Doclin for Mac</a>
   <p class="download-note">macOS 13+ · Preview build · Not notarized</p>
   <p class="small-links"><a href="/setup">Installation help</a> · <a href="https://github.com/shawonibnkamal/doclin-macos">Source code</a></p>
   <img class="app-shot" src="/images/doclin-app.png" alt="Recent dictated text in Doclin; options live in Settings" width="1400" height="1304" />

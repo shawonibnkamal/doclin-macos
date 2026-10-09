@@ -9,18 +9,13 @@ struct DictationView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             DoclinCard {
-                HStack {
-                    Text(controller.settings.enabled ? controller.busy ? controller.phase : "Hold \(controller.shortcutLabel) to dictate" : "Dictation paused")
-                        .font(.system(size: 15, weight: .semibold))
-                    Spacer()
-                    Toggle("Enabled", isOn: Binding(get: { controller.settings.enabled }, set: { controller.settings.enabled = $0; controller.saveSettings() }))
-                        .toggleStyle(.switch).controlSize(.small)
+                DoclinStatusRow(controller.settings.enabled ? controller.busy ? controller.phase : "Hold \(controller.shortcutLabel) to dictate" : "Dictation paused",
+                    enabled: Binding(get: { controller.settings.enabled }, set: { controller.settings.enabled = $0; controller.saveSettings() })) {
                     if controller.busy { Text("\(controller.seconds)s").font(.system(size: 12)).monospacedDigit() }
                 }
-                HStack {
-                    Label(controller.settings.provider == "local" ? "On-device speech" : "Audio sent to OpenAI", systemImage: controller.settings.provider == "local" ? "lock" : "cloud")
-                    if controller.settings.cleanup { Text("· OpenAI text cleanup") }
-                }.font(.system(size: 11)).foregroundColor(.secondary)
+                if controller.settings.provider == "cloud" || controller.settings.cleanup {
+                    DoclinCloudNotice(controller.settings.provider == "cloud" ? "Audio sent to OpenAI" : "Text sent to OpenAI for cleanup")
+                }
                 if controller.settings.enabled || controller.busy {
                     HStack {
                         Button(controller.recording ? "Finish" : "Dictate here") {

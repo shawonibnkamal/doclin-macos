@@ -108,13 +108,14 @@ struct DoclinView: View {
     private var activity: some View {
         VStack(alignment: .leading, spacing: 16) {
             DoclinCard {
-                HStack {
-                    Text(model.preferences.muted ? "Announcements paused" : model.status).font(.system(size: 15, weight: .semibold))
-                    Spacer()
-                    Toggle("Enabled", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
+                DoclinStatusRow(model.preferences.muted ? "Announcements paused" : model.status,
+                    enabled: Binding(get: { !model.preferences.muted }, set: { enabled in
                         if model.preferences.muted != !enabled { model.toggleMute() }
-                    })).toggleStyle(.switch).controlSize(.small)
+                    })) {
                     if model.speaking || model.pendingCount > 0 { Button("Stop") { model.stopAll() } }
+                }
+                if model.preferences.useAI || model.preferences.aiVoice {
+                    DoclinCloudNotice("Text sent to OpenAI")
                 }
             }
             DoclinHistoryCard(title: "Recent updates", emptyMessage: "New Codex and Claude updates appear here.", isEmpty: model.history.isEmpty, clear: { model.clearHistory() }) {
@@ -238,6 +239,30 @@ struct DoclinButton: ButtonStyle {
 struct DoclinTabButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.opacity(configuration.isPressed ? 0.65 : 1).contentShape(Rectangle())
+    }
+}
+// Main pages share status typography, toggle placement and spacing.
+struct DoclinStatusRow<Accessory: View>: View {
+    let title: String
+    @Binding var enabled: Bool
+    let accessory: Accessory
+    init(_ title: String, enabled: Binding<Bool>, @ViewBuilder accessory: () -> Accessory) {
+        self.title = title; self._enabled = enabled; self.accessory = accessory()
+    }
+    var body: some View {
+        HStack {
+            Text(title).font(.system(size: 15, weight: .semibold))
+            Spacer()
+            Toggle("Enabled", isOn: $enabled).toggleStyle(.switch).controlSize(.small)
+            accessory
+        }
+    }
+}
+struct DoclinCloudNotice: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+    var body: some View {
+        Label(text, systemImage: "cloud").font(.system(size: 11)).foregroundColor(.secondary)
     }
 }
 struct DoclinCard<Content: View>: View {
