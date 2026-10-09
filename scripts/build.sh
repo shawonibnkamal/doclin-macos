@@ -51,8 +51,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Doclin</string>
 <key>CFBundleDisplayName</key><string>Doclin</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.4.11</string>
-<key>CFBundleVersion</key><string>19</string>
+<key>CFBundleShortVersionString</key><string>0.4.12</string>
+<key>CFBundleVersion</key><string>20</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><false/>
 <key>NSMicrophoneUsageDescription</key><string>Doclin records your voice only when you start dictation.</string>
@@ -92,5 +92,5 @@ fi
 # Ad-hoc signing runs locally; set SIGN_IDENTITY for a Developer ID distribution build.
 sign_code --force --options runtime --entitlements "$ROOT/scripts/entitlements.plist" "$APP"
 codesign --verify --deep --strict "$APP"
-ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Doclin-0.4.11-mac.zip"
+ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Doclin-0.4.12-mac.zip"
 echo "Built: $APP"
