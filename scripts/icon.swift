@@ -16,13 +16,10 @@ shadow.shadowColor = NSColor.black.withAlphaComponent(0.18)
 shadow.shadowBlurRadius = 16
 shadow.shadowOffset = NSSize(width: 0, height: -8)
 shadow.set()
-NSColor.white.setFill()
+NSColor(calibratedRed: 17.0 / 255, green: 24.0 / 255, blue: 39.0 / 255, alpha: 1).setFill()
 tile.fill()
 NSGraphicsContext.restoreGraphicsState()
-NSGradient(starting: NSColor(calibratedWhite: 1, alpha: 1),
-           ending: NSColor(calibratedRed: 0.91, green: 0.95, blue: 1, alpha: 1))!
-    .draw(in: tile, angle: -90)
-NSColor(calibratedRed: 0.78, green: 0.85, blue: 0.93, alpha: 0.6).setStroke()
+NSColor.white.withAlphaComponent(0.12).setStroke()
 tile.lineWidth = 2
 tile.stroke()
 logo.draw(in: NSRect(x: 202, y: 202, width: 620, height: 620))

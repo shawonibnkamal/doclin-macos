@@ -3,6 +3,7 @@ export default defineConfig({
   title: 'Doclin',
   description: 'Open-source Mac dictation. Local processing by default.',
   outDir: 'dist',
+  appearance: 'force-dark',
   head: [['link', { rel: 'icon', type: 'image/png', href: '/images/logo.png' }]],
   themeConfig: {
     logo: '/images/logo.png',

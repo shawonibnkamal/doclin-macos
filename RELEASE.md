@@ -1,5 +1,7 @@
-# Doclin 0.4.10 — Rounded Dock icon
+# Doclin 0.4.11 — Consistent controls and dark website
 
-The original Doclin logo now sits inside a light rounded square, with transparent margins and a centered inset that matches other macOS Dock icons.
+Agent updates now uses the same Enabled switch as Dictation. Voice preview and agent connections remain beside the status; the duplicate header speaker control is removed. The switch preserves the existing announcement mute behavior.
 
-This resource-only update reuses the verified universal 0.4.9 app executable and voice runtime. Icon generation, all icon sizes, strict signature verification and app relaunch were checked. Development-signed preview, not notarized.
+The rounded Dock tile uses deep navy (#111827), keeping its size and inset. The website stays in dark mode with readable text and a cyan download button; the app interface stays light.
+
+Universal Mac preview, development-signed and not notarized. Native UI and persisted switches, website rendering, core/cloud checks, universal build and strict signature validation checked. Dictation remains paused on the installed Mac.
