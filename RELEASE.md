@@ -1,7 +1,5 @@
-# Doclin 0.4.17 — Cleaner pages
+# Doclin 0.4.18 — Consistent main pages
 
-Removes repeated tab and sidebar headings and the helper text beneath the main status headings. Enabled toggles remain on the main Dictation and Agent updates pages, next to their status.
-
-Settings opens directly to its aligned rows. Existing preferences, privacy notices and paused dictation are preserved.
+Dictation and Agent updates share the same status row, enable toggle and history layout. Local processing details stay in Settings. Both main pages show a matching notice when optional OpenAI processing is configured.
 
 Universal macOS 13+ development-signed preview, not Apple notarized.
