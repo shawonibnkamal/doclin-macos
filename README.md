@@ -16,7 +16,7 @@ See [dictation checks and limitations](DICTATION-QUALITY-QA.md).
 
 ## Download for Mac
 
-[Download Doclin 0.4.8](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.8/Doclin-0.4.8-mac.zip).
+[Download Doclin 0.4.9](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.9/Doclin-0.4.9-mac.zip).
 Unzip, move Doclin.app to Applications, and turn on Dictation. Allow Microphone
 and Accessibility, then hold Right Command in a text field to speak.
 

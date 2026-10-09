@@ -32,6 +32,12 @@ if CommandLine.arguments.contains("--doclin-hook") {
         if let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundle).first(where: { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }) {
             existing.activate(options: .activateIgnoringOtherApps); NSApp.terminate(nil); return
         }
+        // Direct background launches can retain a cached Dock icon. Apply the
+        // bundled icon explicitly, using the same artwork as Finder and downloads.
+        if let iconURL = Bundle.main.url(forResource: "Doclin", withExtension: "icns"),
+           let icon = NSImage(contentsOf: iconURL) {
+            NSApp.applicationIconImage = icon
+        }
         let mainMenu = NSMenu()
         let appMenuRoot = NSMenuItem(); let appMenu = NSMenu()
         let quit = NSMenuItem(title: "Quit Doclin", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
