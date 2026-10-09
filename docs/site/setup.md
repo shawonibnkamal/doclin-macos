@@ -1,6 +1,6 @@
 # Install Doclin
 
-[Download Doclin for Mac](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.9/Doclin-0.4.9-mac.zip).
+[Download Doclin for Mac](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.10/Doclin-0.4.10-mac.zip).
 
 1. Unzip the download and move **Doclin.app** to Applications.
 2. Open Doclin and turn on **Dictation**.

@@ -40,11 +40,11 @@ Application certificate, and notarization credentials. None are in this repo.
 
 ```sh
 UNIVERSAL=1 SIGN_IDENTITY='Developer ID Application: YOUR NAME (TEAMID)' ./scripts/build.sh
-xcrun notarytool submit .build/signed-dist/Doclin-0.4.9-mac.zip --keychain-profile doclin-notary --wait
+xcrun notarytool submit .build/signed-dist/Doclin-0.4.10-mac.zip --keychain-profile doclin-notary --wait
 xcrun stapler staple .build/signed-dist/Doclin.app
 codesign --verify --deep --strict .build/signed-dist/Doclin.app
 spctl --assess --type execute --verbose .build/signed-dist/Doclin.app
-ditto -c -k --sequesterRsrc --keepParent .build/signed-dist/Doclin.app .build/signed-dist/Doclin-0.4.9-mac.zip
+ditto -c -k --sequesterRsrc --keepParent .build/signed-dist/Doclin.app .build/signed-dist/Doclin-0.4.10-mac.zip
 ```
 
 Inspect the exact ZIP contents before upload. Include the third-party license
