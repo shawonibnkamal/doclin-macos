@@ -158,7 +158,7 @@ struct DoclinView: View {
                 Text("Runs on your Mac. If playback fails, the update stays in Agent updates.").font(.system(size: 11)).foregroundColor(mutedInk)
                 HStack { Text("Volume").frame(width: 65, alignment: .leading); Slider(value: binding(\.volume), in: 0...1); Text("\(Int(model.preferences.volume * 100))%").frame(width: 35) }.font(.system(size: 12))
                 HStack { Text("Speed").frame(width: 65, alignment: .leading); Slider(value: binding(\.rate), in: 0.8...1.5); Text(String(format: "%.1f×", model.preferences.rate)).frame(width: 35) }.font(.system(size: 12))
-                Button("Preview voice") { model.preview() }.buttonStyle(DoclinButton())
+                Button("Preview voice") { model.preview() }.buttonStyle(DoclinButton()).disabled(model.preferences.muted)
             }
             DisclosureGroup("Cloud features", isExpanded: $cloudOptions) {
               card {
@@ -212,8 +212,12 @@ struct DoclinView: View {
     }
 }
 struct DoclinButton: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.system(size: 12, weight: .medium)).padding(.horizontal, 15).padding(.vertical, 10).foregroundColor(.white).background(accent.opacity(configuration.isPressed ? 0.8 : 1), in: RoundedRectangle(cornerRadius: 8)).contentShape(Rectangle())
+        configuration.label.font(.system(size: 12, weight: .medium)).padding(.horizontal, 15).padding(.vertical, 10)
+            .foregroundColor(isEnabled ? .white : mutedInk)
+            .background(isEnabled ? accent.opacity(configuration.isPressed ? 0.8 : 1) : ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            .contentShape(Rectangle())
     }
 }
 struct DoclinTabButton: ButtonStyle {
