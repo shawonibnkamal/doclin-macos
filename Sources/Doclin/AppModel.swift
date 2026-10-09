@@ -47,7 +47,7 @@ struct Announcement: Identifiable {
     private var apiCalls = 0
     private var apiDay = Calendar.current.startOfDay(for: Date())
     private let settingsURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude/settings.json")
-    var voices: [AVSpeechSynthesisVoice] { AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("en") }.sorted { $0.name < $1.name } }
+    lazy var voices: [AVSpeechSynthesisVoice] = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("en") }.sorted { $0.name < $1.name }
     override init() {
         super.init()
         key = Keychain.read(); hasKey = key != nil

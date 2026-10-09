@@ -147,9 +147,12 @@ import DoclinCore
     }
     private var audioFolder: URL { DoclinPaths.support.appendingPathComponent("dictation-audio") }
     func refreshPermissions() {
-        microphoneGranted = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
-        speechGranted = SFSpeechRecognizer.authorizationStatus() == .authorized
-        accessibilityGranted = AXIsProcessTrusted()
+        let microphone = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+        let speech = SFSpeechRecognizer.authorizationStatus() == .authorized
+        let accessibility = AXIsProcessTrusted()
+        if microphoneGranted != microphone { microphoneGranted = microphone }
+        if speechGranted != speech { speechGranted = speech }
+        if accessibilityGranted != accessibility { accessibilityGranted = accessibility }
         if settings.enabled && settings.shortcut == "right-command" && accessibilityGranted != shortcutReady { configureHotkey() }
         updateIndicator()
     }
