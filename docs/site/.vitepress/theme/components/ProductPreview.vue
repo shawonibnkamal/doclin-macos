@@ -3,7 +3,7 @@ import { ref } from 'vue'
 const selected = ref('dictation')
 const examples = [
   { id: 'dictation', label: 'Dictation', image: '/images/doclin-app.png', alt: 'Doclin with two example dictations ready to copy or edit' },
-  { id: 'updates', label: 'Spoken updates', image: '/images/doclin-agents.png', alt: 'Doclin with example spoken updates from Codex and Claude' }
+  { id: 'updates', label: 'Spoken updates', image: '/images/doclin-agents.png', alt: 'Doclin with example spoken updates from Codex and Claude Code' }
 ]
 </script>
 
@@ -18,6 +18,6 @@ const examples = [
     <div v-for="example in examples" v-show="selected === example.id" :key="example.id">
       <img class="app-shot" :src="example.image" :alt="example.alt" width="1400" height="1304" />
     </div>
-    <p class="preview-caption">{{ selected === 'dictation' ? 'Speak naturally. Copy or edit your words.' : 'Hear when Codex or Claude finishes a task.' }} <span>Sample content.</span></p>
+    <p class="preview-caption">{{ selected === 'dictation' ? 'Speak naturally. Copy or edit your words.' : 'Hear when Codex or Claude Code finishes a task.' }} <span>Sample content.</span></p>
   </section>
 </template>
