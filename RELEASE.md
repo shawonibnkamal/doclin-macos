@@ -1,7 +1,7 @@
-# Doclin 0.4.13 — Responsive controls
+# Doclin 0.4.14 — Consistent tab layouts
 
-The whole settings header now expands on one click, with consistent 44-point targets, hover/pressed feedback, and separate child controls. Doclin accepts the first click when its window is in the background. Full-width tab targets remain.
+Dictation, Agent updates, and Settings share aligned page headers, compact guidance, 16-point spacing and matching white card surfaces with subtle borders. Dictation instructions use smaller text; Settings use a single surface per section, with dividers instead of nested cards.
 
-The header caches a 96-pixel logo instead of repeatedly decoding the original 7,400-pixel artwork. Closed sections no longer construct hidden controls or query voices, and unchanged permission polling does not trigger redraws.
+Existing full-width click targets, disabled controls, settings routes and privacy disclosures remain. Dictation is paused on the installed Mac and narration preferences are preserved.
 
-Verification: native tab/row/nested-control audit, disabled controls and persisted switches, before/after main-thread sampling, universal build and strict signature validation, core/cloud checks and independent review. Dictation remains paused on the installed Mac. Development-signed preview, not notarized.
+Verification: native tab switching, settings sections, Dictation Options and Connect agents routing; universal build and strict signature verification; 33 core checks and cloud transport checks; independent review. Real installed screenshots accompany the website download. Development-signed preview, not Apple notarized.
