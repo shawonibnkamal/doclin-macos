@@ -17,6 +17,7 @@ struct DoclinView: View {
     @State private var codexPath = ""
     @State private var allUpdates = false
     @State private var cloudOptions = false
+    @State private var hoveredTab: String?
     private var section: String {
         ["Connections", "Voice & AI", "Preferences", "Settings"].contains(model.tab) ? "Settings" : model.tab
     }
@@ -36,9 +37,10 @@ struct DoclinView: View {
                     Button { model.tab = name } label: {
                         Text(name == "Activity" ? "Agent updates" : name).font(.system(size: 13, weight: .medium))
                             .frame(maxWidth: .infinity).padding(.vertical, 9)
-                            .background(section == name ? Color.white : .clear, in: RoundedRectangle(cornerRadius: 7))
+                            .background(section == name ? Color.white : hoveredTab == name ? Color.white.opacity(0.55) : .clear, in: RoundedRectangle(cornerRadius: 7))
                             .contentShape(Rectangle())
-                    }.buttonStyle(.plain)
+                    }.buttonStyle(DoclinTabButton()).onHover { hoveredTab = $0 ? name : nil }
+                        .accessibilityValue(section == name ? "Selected" : "")
                 }
             }.padding(4).background(ink.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
                 .padding(.horizontal, 24).padding(.bottom, 18)
@@ -60,6 +62,8 @@ struct DoclinView: View {
                 }.padding(.horizontal, 24).padding(.bottom, 20)
             }
         }.frame(minWidth: 620, minHeight: 520).background(canvas).foregroundColor(ink).preferredColorScheme(.light)
+        .buttonStyle(.bordered).controlSize(.regular)
+        .disclosureGroupStyle(DoclinDisclosureStyle())
         .onAppear { codexPath = model.preferences.codexHome }
     }
     private var settingsPage: some View {
@@ -72,10 +76,10 @@ struct DoclinView: View {
     }
     private func settingSection<Content: View>(_ title: String, systemImage: String, route: String, @ViewBuilder content: @escaping () -> Content) -> some View {
         DisclosureGroup(isExpanded: Binding(get: { model.tab == route }, set: { model.tab = $0 ? route : "Settings" })) {
-            if model.tab == route { content().padding(.top, 12) }
+            if model.tab == route { content().padding(.top, 12).padding(.horizontal, 16) }
         } label: {
             Label(title, systemImage: systemImage).font(.system(size: 14, weight: .medium))
-        }.padding(16).background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+        }.background(Color.white, in: RoundedRectangle(cornerRadius: 10))
     }
     private var activity: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -209,6 +213,37 @@ struct DoclinView: View {
 }
 struct DoclinButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.system(size: 12, weight: .medium)).padding(.horizontal, 15).padding(.vertical, 10).foregroundColor(.white).background(accent.opacity(configuration.isPressed ? 0.8 : 1), in: RoundedRectangle(cornerRadius: 8))
+        configuration.label.font(.system(size: 12, weight: .medium)).padding(.horizontal, 15).padding(.vertical, 10).foregroundColor(.white).background(accent.opacity(configuration.isPressed ? 0.8 : 1), in: RoundedRectangle(cornerRadius: 8)).contentShape(Rectangle())
+    }
+}
+struct DoclinTabButton: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.opacity(configuration.isPressed ? 0.65 : 1).contentShape(Rectangle())
+    }
+}
+struct DoclinDisclosureStyle: DisclosureGroupStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        DoclinDisclosureRow(configuration: configuration)
+    }
+}
+private struct DoclinDisclosureRow: View {
+    let configuration: DisclosureGroupStyleConfiguration
+    @State private var hovered = false
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button { configuration.isExpanded.toggle() } label: {
+                HStack(spacing: 10) {
+                    configuration.label
+                    Spacer(minLength: 12)
+                    Image(systemName: configuration.isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.system(size: 11, weight: .semibold)).foregroundColor(mutedInk)
+                        .accessibilityHidden(true)
+                }.frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .padding(.horizontal, 16).padding(.vertical, 4).contentShape(Rectangle())
+                    .background(hovered ? accent.opacity(0.06) : .clear, in: RoundedRectangle(cornerRadius: 7))
+            }.buttonStyle(DoclinTabButton()).onHover { hovered = $0 }
+                .accessibilityValue(configuration.isExpanded ? "Expanded" : "Collapsed")
+            if configuration.isExpanded { configuration.content.padding(.bottom, 12) }
+        }
     }
 }

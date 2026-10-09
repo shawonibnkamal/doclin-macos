@@ -2,6 +2,12 @@ import AppKit
 import SwiftUI
 import DoclinCore
 
+final class DoclinHostingView<Content: View>: NSHostingView<Content> {
+    // A background-window click should activate its control as well as focus
+    // Doclin, rather than requiring a second click after activation.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+}
+
 // Hook mode does no UI work, network requests, or agent control. Always fail open.
 if CommandLine.arguments.contains("--doclin-hook") {
     let args = CommandLine.arguments
@@ -53,7 +59,7 @@ if CommandLine.arguments.contains("--doclin-hook") {
         window.title = "Doclin"
         window.titlebarAppearsTransparent = true
         window.backgroundColor = NSColor(calibratedRed: 0.965, green: 0.975, blue: 0.99, alpha: 1)
-        window.contentView = NSHostingView(rootView: DoclinView(model: model))
+        window.contentView = DoclinHostingView(rootView: DoclinView(model: model))
         window.minSize = NSSize(width: 640, height: 560)
         window.isReleasedWhenClosed = false; window.center()
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
