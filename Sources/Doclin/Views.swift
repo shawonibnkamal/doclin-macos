@@ -40,7 +40,7 @@ struct DoclinView: View {
             HStack(spacing: 6) {
                 ForEach(["Dictation", "Activity", "Settings"], id: \.self) { name in
                     Button { model.tab = name } label: {
-                        Text(name == "Activity" ? "Agent updates" : name).font(.system(size: 13, weight: .medium))
+                        Text(name == "Activity" ? "Spoken updates" : name).font(.system(size: 13, weight: .medium))
                             .frame(maxWidth: .infinity).padding(.vertical, 9)
                             .background(section == name ? Color.white : hoveredTab == name ? Color.white.opacity(0.55) : .clear, in: RoundedRectangle(cornerRadius: 7))
                             .contentShape(Rectangle())
@@ -170,7 +170,7 @@ struct DoclinView: View {
                 }
                 DoclinSettingRow("Preview") { Button("Preview voice") { model.preview() }.disabled(model.preferences.muted) }
             }
-            DoclinSettingNote(model.preferences.muted ? "Turn on Agent updates to preview your voice. Local voices run on your Mac." : "Local voices run on your Mac. If playback fails, the update stays in Agent updates.")
+            DoclinSettingNote(model.preferences.muted ? "Turn on Spoken updates to preview your voice. Local voices run on your Mac." : "Local voices run on your Mac. If playback fails, the update stays in Spoken updates.")
         }
     }
     private var cloudSettings: some View {

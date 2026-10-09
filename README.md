@@ -16,7 +16,7 @@ See [dictation checks and limitations](DICTATION-QUALITY-QA.md).
 
 ## Download for Mac
 
-[Download Doclin 0.4.18](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.18/Doclin-0.4.18-mac.zip).
+[Download Doclin 0.4.19](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.19/Doclin-0.4.19-mac.zip).
 Unzip, move Doclin.app to Applications, and enable dictation on the Dictation page. Allow Microphone
 and Accessibility, then hold Right Command in a text field to speak.
 
@@ -61,9 +61,9 @@ Alternative shortcuts are available if another dictation app uses Right Command.
 The recording limit is five minutes with enhanced recognition, 55 seconds with
 legacy local recognition, and 90 seconds with optional OpenAI transcription.
 
-The Dictation and Agent updates tabs list the last 30 entries from this session.
+The Dictation and Spoken updates tabs list the last 30 entries from this session.
 Copy or edit dictated text there. Histories stay in memory and clear on quit.
-Settings uses a category sidebar with aligned rows for configuration, permissions, connections, and voice previews. Enabled toggles stay on the main Dictation and Agent updates pages.
+Settings uses a category sidebar with aligned rows for configuration, permissions, connections, and voice previews. Enabled toggles stay on the main Dictation and Spoken updates pages.
 
 ## Spoken agent updates
 

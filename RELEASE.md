@@ -1,5 +1,5 @@
-# Doclin 0.4.18 — Consistent main pages
+# Doclin 0.4.19 — Clearer name and product previews
 
-Dictation and Agent updates share the same status row, enable toggle and history layout. Local processing details stay in Settings. Both main pages show a matching notice when optional OpenAI processing is configured.
+Renames the Agent updates tab to Spoken updates, including voice-preview and playback recovery messages. The website shows real app screenshots populated with clearly labeled sample content, with a simple selector for both features.
 
 Universal macOS 13+ development-signed preview, not Apple notarized.
