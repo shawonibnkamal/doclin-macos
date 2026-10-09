@@ -7,6 +7,7 @@ import DoclinCore
 @MainActor final class DictationController: NSObject, ObservableObject {
     @Published var settings = DictationPreferences.load()
     @Published var phase = "Ready" { didSet { hudGeneration = UUID(); updateIndicator() } }
+    @Published var history = DictationHistory()
     @Published var transcript = ""
     @Published var originalTranscript = ""
     @Published var message = "Hold the shortcut in a text field to dictate."
@@ -421,16 +422,19 @@ import DoclinCore
         recognitionTask?.cancel(); recognitionTask = nil; recognitionRequest = nil
         let raw = DictationText.normalized(raw)
         guard !raw.isEmpty else { fail("No speech was recognized. Check the microphone and try again.", ticket: ticket); return }
+        history.record(id: ticket, text: raw, original: raw, destination: targetName, timestamp: startedAt)
         networkTask = Task { [weak self] in
             guard let self, self.lifecycle.accepts(ticket), !Task.isCancelled else { return }
             var result = raw
             if self.settings.cleanup, let key = self.keyProvider() {
                 self.phase = "Cleaning up"
+                self.history.setState(ticket, state: "Cleaning up")
                 do { result = try await self.cloud.cleanDictation(raw, key: key) }
                 catch { if self.lifecycle.accepts(ticket) { self.message = "Cleanup was unavailable. Kept your original words." } }
             }
             guard self.lifecycle.accepts(ticket), !Task.isCancelled else { return }
             self.originalTranscript = raw; self.transcript = result
+            self.history.applyResult(ticket, text: result)
             self.insertionStarted = self.settings.autoInsert && self.target != nil
             let outcome: TextInsertion.Result = self.settings.autoInsert ? await self.insertion.insert(result, into: self.target, allowClipboard: self.settings.clipboardFallback) : .retained
             guard !Task.isCancelled, self.lifecycle.complete(ticket) else { return }
@@ -439,6 +443,7 @@ import DoclinCore
             case .pasted: self.phase = "Paste requested"; self.message = "Paste requested in \(self.targetName). Your transcript is also here if the app did not accept it."
             case .retained: self.phase = "Text ready"; self.message = "Could not confirm insertion into the original field. Your transcript is kept below; copy it if needed."
             }
+            self.history.setState(ticket, state: self.phase)
             if self.releasedAt > 0 {
                 let recognitionMS = Int((self.resolvedAt - self.releasedAt) * 1000)
                 let insertionMS = Int((self.now() - self.resolvedAt) * 1000)
@@ -461,6 +466,7 @@ import DoclinCore
     }
     func cancel(showMessage: Bool = true) {
         hideIndicator(); startCue.stop()
+        if let id = lifecycle.ticket { history.setState(id, state: "Text retained") }
         lifecycle.cancel(); finalizing = false
         preparationTask?.cancel(); preparationTask = nil
         if #available(macOS 26.0, *), let session = modernSession as? ModernDictation { session.cancel() }
@@ -502,10 +508,17 @@ import DoclinCore
             self.onBusyChange(false); self.dismissHUDLater()
         }
     }
-    func copyTranscript() {
-        guard !transcript.isEmpty else { return }
-        NSPasteboard.general.clearContents(); NSPasteboard.general.setString(transcript, forType: .string)
+    func copyTranscript() { copyText(transcript) }
+    func copyText(_ text: String) {
+        guard !text.isEmpty else { return }
+        NSPasteboard.general.clearContents(); NSPasteboard.general.setString(text, forType: .string)
         message = "Transcript copied. Paste it wherever you like."
+    }
+    func clearHistory() { guard !busy else { return }; history.clear(); clearTranscript() }
+    func editHistory(_ id: UUID, text: String) {
+        guard !busy else { return }
+        history.edit(id, text: text)
+        if history.entries.first?.id == id { transcript = text }
     }
     func clearTranscript() { transcript = ""; originalTranscript = ""; partial = "" }
     @objc private func sleeping() { cancel() }

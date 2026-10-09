@@ -1,9 +1,9 @@
 # Install Doclin
 
-[Download Doclin for Mac](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.14/Doclin-0.4.14-mac.zip).
+[Download Doclin for Mac](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.15/Doclin-0.4.15-mac.zip).
 
 1. Unzip the download and move **Doclin.app** to Applications.
-2. Open Doclin and turn on **Dictation**.
+2. Open **Settings → Dictation** and enable dictation.
 3. Allow Microphone and Accessibility when prompted, then click **Refresh**.
 4. Focus a text field, hold Right Command, speak, and release.
 
@@ -20,7 +20,7 @@ choose a macOS voice under **Settings → Voice**.
 
 ## If words do not appear
 
-Check the transcript in Doclin and copy it. Under **Options → Troubleshooting**,
+Check the transcript in Doclin and copy it. Under **Settings → Dictation → Troubleshooting**,
 refresh permissions or run the insertion check. Review names, numbers, and
 meaning before sending. Doclin never presses Send or Return.
 

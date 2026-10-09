@@ -23,7 +23,7 @@ zero provider retention. A canceled request may already have reached OpenAI.
 ## Local retention and permissions
 
 Local-mode dictation audio is not written to disk by Doclin. Dictation text
-and recent announcements stay in memory until cleared or the app exits.
+and the last 30 dictations and agent updates stay in memory until cleared or the app exits.
 Cloud-mode recordings and generated speech temporarily use private audio
 files. Completion/cancellation removes them; crash leftovers are cleaned at
 next launch. Transient Claude hook messages use a user-private inbox and are

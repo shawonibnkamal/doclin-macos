@@ -2,6 +2,39 @@ import Foundation
 import DoclinCore
 
 final class CoreTests {
+    func testDictationHistoryRetainsSessionsWithoutDuplicatesOrEmptyText() {
+        var history = DictationHistory()
+        let id = UUID(), date = Date()
+        history.record(id: id, text: "First", original: "first", destination: "Notes", timestamp: date)
+        history.record(id: id, text: "Duplicate", original: "duplicate", destination: "Notes", timestamp: date)
+        history.record(id: UUID(), text: "  ", original: "", destination: "Notes", timestamp: date)
+        XCTAssertEqual(history.entries.count, 1)
+        for i in 0..<35 { history.record(id: UUID(), text: "Text \(i)", original: "Text \(i)", destination: "Notes", timestamp: date) }
+        XCTAssertEqual(history.entries.count, 30)
+        XCTAssertEqual(history.entries.first?.text, "Text 34")
+        XCTAssertEqual(history.entries.last?.text, "Text 5")
+    }
+    func testDictationHistoryEditsKeepOriginalAndClearingIsSessionOnly() {
+        var history = DictationHistory()
+        let id = UUID()
+        history.record(id: id, text: "Polished", original: "Original 123", destination: "Notes", timestamp: Date())
+        history.setState(id, state: "Cleaning up")
+        history.setState(id, state: "Text retained")
+        XCTAssertEqual(history.entries.first?.original, "Original 123")
+        history.applyResult(id, text: "Cleaned 123")
+        XCTAssertEqual(history.entries.count, 1)
+        XCTAssertEqual(history.entries.first?.original, "Original 123")
+        history.setState(id, state: "Inserted")
+        history.edit(id, text: "Edited 123")
+        XCTAssertEqual(history.entries.first?.original, "Original 123")
+        XCTAssertEqual(history.entries.first?.state, "Edited")
+        history.edit(id, text: "Original 123")
+        XCTAssertEqual(history.entries.first?.state, "Original text")
+        history.clear()
+        XCTAssertTrue(history.entries.isEmpty)
+        XCTAssertTrue(DictationHistory().entries.isEmpty)
+    }
+
     func event(_ turn: String, session: String = "a", kind: String = "complete", age: Double = 0) -> AgentEvent {
         AgentEvent(source: "Codex", session: session, turn: turn, kind: kind, text: "Tests failed. Deployment is blocked.", timestamp: Date().addingTimeInterval(-age))
     }

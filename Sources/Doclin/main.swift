@@ -54,6 +54,18 @@ if CommandLine.arguments.contains("--doclin-hook") {
         }
         editRoot.submenu = edit; mainMenu.addItem(editRoot); NSApp.mainMenu = mainMenu
         model = AppModel()
+        #if DEBUG
+        // Explicit, isolated UI fixture. No microphone, playback or cloud request.
+        if CommandLine.arguments.contains("--ui-audit"),
+           DoclinPaths.support.path.hasPrefix("/tmp/doclin-"), !model.dictation.settings.enabled,
+           model.preferences.muted, !model.preferences.codexEnabled, !model.preferences.claudeEnabled {
+            for i in 1...4 {
+                model.dictation.history.record(id: UUID(), text: "Dictation sample \(i). Keep the number 123 and the project name Doclin.", original: "dictation sample \(i) keep the number 123 and the project name Doclin", destination: "Notes", timestamp: Date().addingTimeInterval(Double(i)))
+                let event = AgentEvent(source: i % 2 == 0 ? "Codex" : "Claude", session: "ui-audit-\(i)", text: "Sample update \(i). Tests pass and the task is ready for review.", timestamp: Date().addingTimeInterval(Double(i)))
+                model.history.insert(Announcement(id: UUID(), event: event, text: event.text, state: "Spoken", mode: "Local"), at: 0)
+            }
+        }
+        #endif
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 700, height: 620), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         model.dictation.openSettings = { [weak self] in self?.showDictation() }
         window.title = "Doclin"
@@ -82,7 +94,7 @@ if CommandLine.arguments.contains("--doclin-hook") {
         item.button?.image = NSImage(systemSymbolName: model.preferences.muted ? "speaker.slash" : "waveform", accessibilityDescription: "Doclin")
     }
     @objc func showWindow() { window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true) }
-    @objc func showDictation() { model.tab = "Dictation"; showWindow() }
+    @objc func showDictation() { model.tab = "Dictation settings"; showWindow() }
     @objc func cancelDictation() { model.dictation.cancel() }
     @objc func toggleMute() { model.toggleMute(); rebuildMenu() }
     @objc func stop() { model.stopAll() }

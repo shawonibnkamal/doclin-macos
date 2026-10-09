@@ -15,11 +15,10 @@ struct DoclinView: View {
     @ObservedObject var model: AppModel
     @State private var apiKey = ""
     @State private var codexPath = ""
-    @State private var allUpdates = false
     @State private var cloudOptions = false
     @State private var hoveredTab: String?
     private var section: String {
-        ["Connections", "Voice & AI", "Preferences", "Settings"].contains(model.tab) ? "Settings" : model.tab
+        ["Dictation settings", "Connections", "Voice & AI", "Preferences", "Settings"].contains(model.tab) ? "Settings" : model.tab
     }
     var body: some View {
         VStack(spacing: 0) {
@@ -56,7 +55,7 @@ struct DoclinView: View {
                     }
                     switch model.tab {
                     case "Dictation": DictationView(controller: model.dictation, model: model)
-                    case "Connections", "Voice & AI", "Preferences", "Settings": settingsPage
+                    case "Dictation settings", "Connections", "Voice & AI", "Preferences", "Settings": settingsPage
                     default: activity
                     }
                 }.padding(.horizontal, 24).padding(.bottom, 20)
@@ -69,6 +68,7 @@ struct DoclinView: View {
     private var settingsPage: some View {
         VStack(alignment: .leading, spacing: 16) {
             DoclinPageHeader("Settings", subtitle: "Choose your voice, connected agents, and preferences.")
+            settingSection("Dictation", systemImage: "mic", route: "Dictation settings") { DictationSettingsView(controller: model.dictation, model: model) }
             settingSection("Voice", systemImage: "speaker.wave.2", route: "Voice & AI") { voiceSettings }
             settingSection("Agents", systemImage: "terminal", route: "Connections") { connections }
             settingSection("General", systemImage: "slider.horizontal.3", route: "Preferences") { preferences }
@@ -83,53 +83,32 @@ struct DoclinView: View {
     }
     private var activity: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DoclinPageHeader("Agent updates", subtitle: "Hear when your agents finish or need your attention.") {
-                Toggle("Enabled", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
-                    if model.preferences.muted != !enabled { model.toggleMute() }
-                })).toggleStyle(.switch).controlSize(.small)
-            }
+            DoclinPageHeader("Agent updates", subtitle: "Your recent spoken updates, newest first.")
             DoclinCard {
-                Text(model.preferences.muted ? "Announcements paused" : model.status)
-                    .font(.system(size: 15, weight: .semibold))
-                Text("Listen to a sample or manage your connected agents.")
-                    .font(.system(size: 13)).foregroundColor(mutedInk)
                 HStack {
-                    Button("Preview voice") { model.preview() }.buttonStyle(DoclinButton()).disabled(model.preferences.muted)
-                    Button("Connect agents") { model.tab = "Connections" }
+                    Text(model.preferences.muted ? "Announcements paused" : model.status).font(.system(size: 15, weight: .semibold))
                     Spacer()
                     if model.speaking || model.pendingCount > 0 { Button("Stop") { model.stopAll() } }
                 }
+                Text(model.preferences.muted ? "Enable announcements in Settings when you're ready." : "Hear when your connected agents finish or need attention.")
+                    .font(.system(size: 13)).foregroundColor(mutedInk)
             }
-            DoclinCard {
-                Text("Recent updates").font(.system(size: 15, weight: .semibold))
-                if model.history.isEmpty {
-                    Text("New Codex and Claude updates appear here.").font(.system(size: 13)).foregroundColor(mutedInk).padding(.vertical, 16).frame(maxWidth: .infinity, alignment: .leading)
-                } else {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(Array(model.history.prefix(allUpdates ? model.history.count : 3))) { row in
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(row.event.source).font(.system(size: 11, weight: .medium))
-                                    Text(row.state).font(.system(size: 11)).foregroundColor(mutedInk)
-                                    Spacer()
-                                    Text(row.event.timestamp, style: .time).font(.system(size: 11)).foregroundColor(mutedInk)
-                                }
-                                Text(row.text).font(.system(size: 14)).textSelection(.enabled)
-                            }.padding(.vertical, 13)
-                            Divider()
-                        }
-                    }
-                    HStack {
-                        if model.history.count > 3 { Button(allUpdates ? "Show less" : "Show all updates") { allUpdates.toggle() } }
-                        Spacer()
-                        Button("Clear") { model.clearHistory() }
-                    }.font(.system(size: 12))
+            DoclinHistoryCard(title: "Recent updates", emptyMessage: "New Codex and Claude updates appear here.", isEmpty: model.history.isEmpty, clear: { model.clearHistory() }) {
+                ForEach(model.history) { row in
+                    VStack(alignment: .leading, spacing: 8) {
+                        DoclinHistoryMetadata(source: row.event.source, state: row.state, timestamp: row.event.timestamp)
+                        Text(row.text).font(.system(size: 14)).textSelection(.enabled)
+                    }.padding(.vertical, 12)
+                    Divider()
                 }
             }
         }
     }
     private var connections: some View {
         VStack(alignment: .leading, spacing: 16) {
+            Toggle("Enable agent announcements", isOn: Binding(get: { !model.preferences.muted }, set: { enabled in
+                if model.preferences.muted != !enabled { model.toggleMute() }
+            })).toggleStyle(.switch).controlSize(.small)
             card {
                 HStack { Label("Codex", systemImage: "terminal").font(.system(size: 17, weight: .semibold)); Spacer(); Toggle("Announce", isOn: binding(\.codexEnabled)).toggleStyle(.switch).controlSize(.small) }
                 Text("Desktop + CLI").font(.system(size: 12, weight: .medium)).foregroundColor(accent)
@@ -204,7 +183,7 @@ struct DoclinView: View {
                 Label("Your conversations stay yours", systemImage: "lock.shield").font(.system(size: 15, weight: .semibold))
                 Text("Local dictation and voices stay on your Mac. Optional cloud features send selected audio or text to OpenAI.").font(.system(size: 12)).foregroundColor(mutedInk).lineSpacing(4)
                 DisclosureGroup("Privacy details") {
-                  Text("Recent announcements are held in memory and cleared on quit. Hook messages use a private local inbox while Doclin runs. Crash leftovers are removed on the next launch or hook. API keys live in Keychain. Cloud requests use OpenAI directly; there is no Doclin server or analytics.").font(.system(size: 12)).foregroundColor(mutedInk).lineSpacing(4)
+                  Text("The last 30 dictations and agent updates are held in memory and cleared on quit. Hook messages use a private local inbox while Doclin runs. Crash leftovers are removed on the next launch or hook. API keys live in Keychain. Cloud requests use OpenAI directly; there is no Doclin server or analytics.").font(.system(size: 12)).foregroundColor(mutedInk).lineSpacing(4)
                 Text("AI summaries request store: false. OpenAI’s own API data policies still apply.").font(.system(size: 11)).foregroundColor(mutedInk)
                 }
                 Button("Clear recent announcements") { model.clearHistory() }
@@ -295,5 +274,40 @@ extension View {
     func doclinSurface() -> some View {
         background(Color.white, in: RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(ink.opacity(0.06), lineWidth: 1).allowsHitTesting(false))
+    }
+}
+
+struct DoclinHistoryCard<Content: View>: View {
+    let title: String
+    let emptyMessage: String
+    let isEmpty: Bool
+    var canClear = true
+    let clear: () -> Void
+    @ViewBuilder let content: Content
+    var body: some View {
+        DoclinCard {
+            HStack {
+                Text(title).font(.system(size: 15, weight: .semibold))
+                Spacer()
+                if !isEmpty { Button("Clear", action: clear).disabled(!canClear) }
+            }
+            if isEmpty {
+                Text(emptyMessage).font(.system(size: 13)).foregroundColor(mutedInk)
+                    .padding(.vertical, 16).frame(maxWidth: .infinity, alignment: .leading)
+            } else { content }
+        }
+    }
+}
+struct DoclinHistoryMetadata: View {
+    let source: String
+    let state: String
+    let timestamp: Date
+    var body: some View {
+        HStack {
+            Text(source).font(.system(size: 11, weight: .medium))
+            Text(state).foregroundColor(mutedInk)
+            Spacer()
+            Text(timestamp, style: .time).foregroundColor(mutedInk)
+        }.font(.system(size: 11))
     }
 }

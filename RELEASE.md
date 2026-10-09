@@ -1,7 +1,7 @@
-# Doclin 0.4.14 — Consistent tab layouts
+# Doclin 0.4.15 — History tabs and central settings
 
-Dictation, Agent updates, and Settings share aligned page headers, compact guidance, 16-point spacing and matching white card surfaces with subtle borders. Dictation instructions use smaller text; Settings use a single surface per section, with dividers instead of nested cards.
+Dictation and Agent updates now use matching session history lists with timestamps and states. The last 30 completed dictations remain in memory, including original words for editing and restoring. Both lists show every retained entry; neither has options or preference controls.
 
-Existing full-width click targets, disabled controls, settings routes and privacy disclosures remain. Dictation is paused on the installed Mac and narration preferences are preserved.
+Settings contains Dictation, Voice, Agents and General, including enable switches, voice previews, permissions and troubleshooting. Menu-bar dictation setup opens the new Settings section. Existing preferences and paused dictation are preserved. Histories clear on quit and are never written to disk.
 
-Verification: native tab switching, settings sections, Dictation Options and Connect agents routing; universal build and strict signature verification; 33 core checks and cloud transport checks; independent review. Real installed screenshots accompany the website download. Development-signed preview, not Apple notarized.
+Universal macOS 13+ development-signed preview, not Apple notarized.
