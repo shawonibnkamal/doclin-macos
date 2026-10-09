@@ -39,7 +39,7 @@ clipboard; clipboard managers may retain it under their own policies.
 
 Connecting Claude modifies only Doclin's marked hooks and creates a private
 backup of existing settings. Disconnect removes Doclin hooks. To uninstall,
-disconnect Claude, disable Start at login, remove the API key in Voice & AI,
+disconnect Claude, disable Start at login, remove the API key in Settings → Voice → Cloud features,
 quit, and remove the app. Application Support and configuration backups remain
 until you remove them yourself.
 
