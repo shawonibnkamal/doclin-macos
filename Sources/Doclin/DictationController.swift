@@ -358,7 +358,7 @@ import DoclinCore
     private func tick() {
         guard recording else { return }
         seconds = Int(Date().timeIntervalSince(startedAt))
-        if let recorder { recorder.updateMeters(); level = min(1, pow(10, recorder.averagePower(forChannel: 0) / 20) * 5) }
+        if let recorder { recorder.updateMeters(); level = AudioMeter.level(decibels: recorder.averagePower(forChannel: 0)) }
         if seconds >= (modernSession != nil ? 300 : settings.provider == "local" ? 55 : 90) { finish() }
     }
     func finish() {
