@@ -32,7 +32,7 @@ struct DictationHUD: View {
                     }
                 }.frame(width: 39, height: 20).animation(.easeOut(duration: 0.1), value: controller.indicatorLevel)
                     .accessibilityLabel("Microphone level").accessibilityValue("\(Int(controller.indicatorLevel * 100)) percent")
-                Text(controller.microphoneStarting ? "…" : String(format: "%d:%02d", controller.seconds / 60, controller.seconds % 60))
+                Text(controller.indicatorStarting ? "…" : String(format: "%d:%02d", controller.seconds / 60, controller.seconds % 60))
                     .font(.system(size: 10, design: .monospaced)).foregroundColor(.white.opacity(0.7)).frame(width: 32)
             } else {
                 Button(state == .retained ? "Copy text" : warning ? "Set up" : state == .processing ? "Working…" : "Dictate") {
@@ -53,7 +53,7 @@ struct DictationHUD: View {
     }
     private var symbol: String {
         switch state {
-        case .listening: return controller.microphoneStarting ? "mic.fill" : "stop.fill"
+        case .listening: return "stop.fill"
         case .success: return "checkmark"
         case .retained: return "doc.text"
         case .setup, .error: return "exclamationmark"

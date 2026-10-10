@@ -73,6 +73,7 @@ import DoclinCore
         case .ready: return "Or click the microphone · Doclin"
         }
     }
+    var indicatorStarting: Bool { !indicatorPreview && (indicatorArmed || microphoneStarting) }
     var indicatorHeight: CGFloat { 38 }
     var indicatorWidth: CGFloat { 184 }
     var indicatorLevel: Float { indicatorPreview ? 0.6 : level }
@@ -529,7 +530,8 @@ import DoclinCore
         permissionTimer?.invalidate(); permissionTimer = nil; stopIndicatorPreview(); cancel(showMessage: false); hotkey.unregister(); panel?.orderOut(nil); NSWorkspace.shared.notificationCenter.removeObserver(self) }
     func indicatorAction() {
         if indicatorPreview { stopIndicatorPreview(); return }
-        if recording { finish() }
+        if indicatorArmed && !recording { hotkey.cancelPendingHold(); hideIndicator() }
+        else if recording { finish() }
         else if indicatorState == .setup || indicatorState == .error || !settings.enabled { openSettings() }
         else if !busy { begin() }
     }
