@@ -14,8 +14,7 @@ inspectable; it does not make every optional mode offline.
 | OpenAI notification voice | Off | Spoken sentence to OpenAI |
 
 Local recognition explicitly requires on-device support and does not silently
-switch to Apple's servers. No Doclin server, account, analytics or telemetry
-is used. Model/dependency setup downloads public files from their vendors.
+switch to Apple's servers. The Mac app uses no Doclin server, account, analytics or telemetry. Model/dependency setup downloads public files from their vendors.
 Optional cloud processing uses the user's own key; provider policies and
 charges apply. Responses requests set `store: false`, which is not a claim of
 zero provider retention. A canceled request may already have reached OpenAI.
@@ -44,3 +43,16 @@ quit, and remove the app. Application Support and configuration backups remain
 until you remove them yourself.
 
 [Inspect the app source](https://github.com/shawonibnkamal/doclin-macos)
+
+## Website analytics and downloads
+
+The doclin.dev website uses Vercel Web Analytics to count page views and
+visitors and report referral sources, approximate countries, browsers and
+devices. This is separate from the Mac app: no recordings, transcripts,
+custom words or agent content are sent to website analytics. Query strings
+and URL fragments are removed before page-view events are sent. Vercel Web
+Analytics does not use tracking cookies. See [Vercel’s analytics privacy
+information](https://vercel.com/docs/analytics/privacy-policy).
+
+App downloads are hosted by GitHub, which reports aggregate release-asset
+download counts. These counts are not unique users or confirmed installations.

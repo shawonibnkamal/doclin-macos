@@ -192,8 +192,8 @@ import DoclinCore
             // Serialize reservations across canceled preparation tasks/language changes.
             await previousTask?.value
             guard !Task.isCancelled, let self else { return }
-            guard enabled, provider == "local", SpeechTranscriber.isAvailable,
-                  let locale = await SpeechTranscriber.supportedLocale(equivalentTo: Locale(identifier: identifier)) else {
+            guard enabled, provider == "local",
+                  let locale = await DictationTranscriber.supportedLocale(equivalentTo: Locale(identifier: identifier)) else {
                 if let previous = self.reservedModernLocale { _ = await AssetInventory.release(reservedLocale: previous); self.reservedModernLocale = nil }
                 if enabled && provider == "local" { self.engineMessage = "Enhanced recognition is unavailable for this language; using Apple speech." }
                 return
@@ -207,7 +207,7 @@ import DoclinCore
                 _ = try await AssetInventory.reserve(locale: locale)
                 self.reservedModernLocale = locale
                 try Task.checkCancellation()
-                let transcriber = SpeechTranscriber(locale: locale, preset: .progressiveTranscription)
+                let transcriber = DictationTranscriber(locale: locale, preset: .progressiveLongDictation)
                 if await AssetInventory.status(forModules: [transcriber]) != .installed {
                     self.engineMessage = "Downloading the on-device speech model. Audio stays on your Mac."
                     if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) { try await request.downloadAndInstall() }
@@ -216,8 +216,8 @@ import DoclinCore
                 let session = try await ModernDictation.prepare(locale: locale, terms: terms) { _ in }
                 guard !Task.isCancelled else { session.cancel(); return }
                 self.preparedModernSession = session; self.modernReady = true
-                self.recognitionEngine = "Enhanced Apple speech"
-                self.engineMessage = "Enhanced streaming recognition is ready. Audio stays on your Mac."
+                self.recognitionEngine = "Apple dictation"
+                self.engineMessage = "On-device dictation is ready with custom-word hints."
             } catch {
                 guard !Task.isCancelled else { return }
                 self.modernReady = false; self.preparedAssetLocale = ""
