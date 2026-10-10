@@ -1,5 +1,6 @@
 import AVFoundation
 import Speech
+import DoclinCore
 
 /// Seal the audio stream at release without waiting for hardware teardown.
 /// Closing and appending share a lock, so every accepted buffer precedes endAudio.
@@ -50,7 +51,7 @@ final class DictationCapture: @unchecked Sendable {
                     if let values = buffer.floatChannelData?[0], buffer.frameLength > 0 {
                         var sum: Float = 0
                         for i in 0..<Int(buffer.frameLength) { sum += values[i] * values[i] }
-                        level(min(1, sqrt(sum / Float(buffer.frameLength)) * 8))
+                        level(AudioMeter.level(rms: sqrt(sum / Float(buffer.frameLength))))
                     }
                 }
                 tapped = true

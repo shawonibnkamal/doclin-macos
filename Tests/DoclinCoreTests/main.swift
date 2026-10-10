@@ -12,6 +12,7 @@ let support = FileManager.default.temporaryDirectory.appendingPathComponent("doc
 setenv("DOCLIN_SUPPORT_DIR", support.path, 1)
 let suite = CoreTests()
 let checks: [(String, () throws -> Void)] = [
+("testAudioMeterShowsQuietSpeechAndRejectsSilence", suite.testAudioMeterShowsQuietSpeechAndRejectsSilence),
 ("testDictationHistoryRetainsSessionsWithoutDuplicatesOrEmptyText", suite.testDictationHistoryRetainsSessionsWithoutDuplicatesOrEmptyText),
 ("testDictationHistoryEditsKeepOriginalAndClearingIsSessionOnly", suite.testDictationHistoryEditsKeepOriginalAndClearingIsSessionOnly),
 ("testLocalVoiceSettingsMigrateAutomaticAndPreserveExplicitChoice", suite.testLocalVoiceSettingsMigrateAutomaticAndPreserveExplicitChoice),

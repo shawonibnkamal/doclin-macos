@@ -2,6 +2,15 @@ import Foundation
 import DoclinCore
 
 final class CoreTests {
+    func testAudioMeterShowsQuietSpeechAndRejectsSilence() {
+        XCTAssertEqual(AudioMeter.level(rms: 0), 0)
+        XCTAssertEqual(AudioMeter.level(decibels: -80), 0)
+        XCTAssertTrue(AudioMeter.level(rms: 0.005) > 0.25)
+        XCTAssertTrue(AudioMeter.level(rms: 0.05) > AudioMeter.level(rms: 0.005))
+        XCTAssertEqual(AudioMeter.level(rms: 1), 1)
+        XCTAssertEqual(AudioMeter.level(rms: .nan), 0)
+        XCTAssertEqual(AudioMeter.level(decibels: -.infinity), 0)
+    }
     func testDictationHistoryRetainsSessionsWithoutDuplicatesOrEmptyText() {
         var history = DictationHistory()
         let id = UUID(), date = Date()
