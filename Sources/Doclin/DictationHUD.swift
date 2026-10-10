@@ -13,7 +13,8 @@ enum DictationIndicatorState { case off, setup, ready, listening, processing, su
 
 struct DictationHUD: View {
     @ObservedObject var controller: DictationController
-    private let mint = Color(red: 0.66, green: 0.94, blue: 0.78)
+    // Match the cyan accent used by Doclin's dark website and branding (#5cdaff).
+    private let accent = Color(red: 92 / 255, green: 218 / 255, blue: 1)
     private var state: DictationIndicatorState { controller.indicatorState }
     private var warning: Bool { state == .setup || state == .error }
     var body: some View {
@@ -22,13 +23,13 @@ struct DictationHUD: View {
                 if state == .processing { ProgressView().controlSize(.mini).frame(width: 24, height: 24) }
                 else { Image(systemName: symbol).font(.system(size: 11, weight: .semibold)).frame(width: 24, height: 24).contentShape(Circle()) }
             }.buttonStyle(.plain).disabled(state == .processing)
-                .foregroundColor(warning ? .orange : mint)
+                .foregroundColor(warning ? .orange : accent)
                 .accessibilityLabel(state == .listening ? "Finish dictation" : warning ? "Open dictation setup" : "Start dictation")
                 .help(controller.indicatorTitle)
             if state == .listening {
                 HStack(spacing: 3) {
                     ForEach(0..<7) { index in
-                        Capsule().fill(mint).frame(width: 3, height: max(3, CGFloat(controller.indicatorLevel) * 19 * (0.4 + 0.6 * abs(sin(Double(index) * 1.7)))))
+                        Capsule().fill(accent).frame(width: 3, height: max(3, CGFloat(controller.indicatorLevel) * 19 * (0.4 + 0.6 * abs(sin(Double(index) * 1.7)))))
                     }
                 }.frame(width: 39, height: 20).animation(.easeOut(duration: 0.1), value: controller.indicatorLevel)
                     .accessibilityLabel("Microphone level").accessibilityValue("\(Int(controller.indicatorLevel * 100)) percent")
@@ -46,7 +47,7 @@ struct DictationHUD: View {
                 .accessibilityLabel(controller.busy ? "Cancel dictation" : "Hide dictation indicator")
         }
         .padding(.horizontal, 10).frame(width: controller.indicatorWidth, height: controller.indicatorHeight)
-        .background(Color(red: 0.075, green: 0.09, blue: 0.10), in: Capsule())
+        .background(Color(red: 13 / 255, green: 20 / 255, blue: 34 / 255), in: Capsule())
         .overlay(Capsule().stroke(.white.opacity(0.12)).allowsHitTesting(false))
         .foregroundColor(.white).preferredColorScheme(.dark)
         .help(controller.indicatorPreview ? "Preview only · microphone is off" : controller.indicatorSubtitle)
