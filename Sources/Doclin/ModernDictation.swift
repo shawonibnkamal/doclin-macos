@@ -55,10 +55,9 @@ final class AnalyzerAudioStream: DictationAudioSink, @unchecked Sendable {
         self.analyzer = analyzer; self.stream = stream
     }
     static func prepare(locale: Locale, terms: [String], update: @escaping (String) -> Void) async throws -> ModernDictation {
-        guard SpeechTranscriber.isAvailable,
-              let locale = await SpeechTranscriber.supportedLocale(equivalentTo: locale) else { throw PreparationError.unavailable }
+        guard let locale = await DictationTranscriber.supportedLocale(equivalentTo: locale) else { throw PreparationError.unavailable }
         try Task.checkCancellation()
-        let transcriber = SpeechTranscriber(locale: locale, preset: .progressiveTranscription)
+        let transcriber = DictationTranscriber(locale: locale, preset: .progressiveLongDictation)
         guard await AssetInventory.status(forModules: [transcriber]) == .installed else { throw PreparationError.unavailable }
         guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [transcriber]) else { throw PreparationError.unavailable }
         let analyzer = SpeechAnalyzer(modules: [transcriber])

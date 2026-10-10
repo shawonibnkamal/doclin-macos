@@ -16,7 +16,7 @@ See [dictation checks and limitations](DICTATION-QUALITY-QA.md).
 
 ## Download for Mac
 
-[Download Doclin 0.4.20](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.20/Doclin-0.4.20-mac.zip).
+[Download Doclin 0.4.21](https://github.com/shawonibnkamal/doclin-macos/releases/download/v0.4.21/Doclin-0.4.21-mac.zip).
 Unzip, move Doclin.app to Applications, and enable dictation on the Dictation page. Allow Microphone
 and Accessibility, then hold Right Command in a text field to speak.
 
@@ -98,3 +98,15 @@ in every app. See the checked-in QA documents for measured scope.
 The main app is [MIT licensed](LICENSE). Bundled components retain their own
 licenses, and the separate GPL-linked voice helper is GPL-3.0-or-later.
 See [third-party notices](THIRD-PARTY-NOTICES.md).
+
+## Website and download statistics
+
+The VitePress landing page lives in `docs/site` and is hosted by the personal
+`shawonnotes/doclin` Vercel project at https://doclin.dev.
+
+- Website visitors and page views: https://vercel.com/shawonnotes/doclin/analytics
+- App ZIP download counts: run `./scripts/download-counts.sh` (GitHub CLI required).
+
+Vercel Hobby analytics includes page views, but not custom download-click events.
+GitHub counts asset downloads, not unique people or completed installations.
+Website analytics sends no Mac app recordings, transcripts or agent content.
